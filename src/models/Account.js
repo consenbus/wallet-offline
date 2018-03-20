@@ -1,10 +1,13 @@
-import { extendObservable } from "mobx";
-import rpc from "../utils/rpc";
-import store from "../utils/store";
-import Wallet from "../utils/wallet";
-import _isEmpty from "lodash/isEmpty";
-import _merge from "lodash/merge";
-import _each from "lodash/each";
+import { extendObservable } from 'mobx';
+import _isEmpty from 'lodash/isEmpty';
+import _merge from 'lodash/merge';
+import _find from 'lodash/find';
+import _map from 'lodash/map';
+import _filter from 'lodash/filter';
+import rpc from '../utils/rpc';
+import pow from '../utils/wallet/pow';
+import store from '../utils/store';
+import converter from '../utils/converter';
 
 class Account {
   constructor() {
@@ -13,82 +16,237 @@ class Account {
       accounts: [],
       currentAccount: {},
       currentHistory: {},
-      createLoading: false
+      createLoading: false,
     });
-    this.wallet = null;
   }
 
   hasAccounts() {
     return !_isEmpty(this.accounts);
   }
 
-  createAccount(name, password) {
+  async createAccount(name) {
     this.createLoading = true;
-
-    // generate seed and key
-    this.wallet = new Wallet(password);
-    const seed = this.wallet.createWallet();
-    const pack = this.wallet.pack();
-    const seedb = this.wallet.encrypt(seed, password);
-    const data = { name, seed: seedb, pack };
-    const accounts = this.wallet.getAccounts();
-    const account = accounts[0].account;
-
-    return store
-      .setItem("wallet-offline", data)
-      .then(() => {
-        this.accounts = accounts;
-        this.createLoading = false;
-        return this.getAccountBlocks(account);
-      })
-      .then(res => {
-        // update wallet blocks
-        _each(res.data.history, block => {
-          const blk = this.wallet.newBlock(block, account);
-          this.wallet.importBlock(blk, account, false);
-        });
-        this.wallet.useAccount(account);
-        data.pack = this.wallet.pack();
-        return store.setItem("wallet-offline", data);
-      })
-      .then(() => {
-        // pow
-        this.wallet.clientPoW(() => {
-          console.log("clientPoW callback");
-        });
-      });
+    const walletResult = await rpc.post('/', { action: 'wallet_create' });
+    const seed = walletResult.data.wallet;
+    const keys = await rpc.post('/', {
+      action: 'deterministic_key',
+      seed,
+      index: '0',
+    });
+    this.saveAccount(name, keys, seed);
   }
 
-  getAccountBlocks(account) {
-    return rpc.post("/", {
-      action: "account_history",
+  async restoreAccount(name, seed) {
+    this.createLoading = true;
+    const keys = await rpc.post('/', {
+      action: 'deterministic_key',
+      seed,
+      index: '0',
+    });
+    this.saveAccount(name, keys, seed);
+  }
+
+  async saveAccount(name, keys, seed) {
+    this.currentAccount = _merge(keys.data, { name, seed });
+    this.accounts.push(this.currentAccount);
+    const storeResult = await store.setItem('wallet-online', this.accounts);
+    this.accounts = storeResult;
+    this.createLoading = false;
+    return storeResult;
+  }
+
+  async send(amount, unit, toAccountAddress) {
+    const account = this.currentAccount;
+
+    // Step 1. Convert amount to raw 128-bit stringified integer. Since converion
+    const rawAmount = converter.unit(amount, unit, 'raw');
+
+    // Step 2. Retrieve your account info to get your latest block hash (frontier)
+    // and balance
+    const info = await rpc.post('/', {
+      action: 'account_info',
+      account: this.currentAccount.account,
+      count: 1,
+    });
+
+    // Step 3. Generate Proof of Work from your account's frontier
+    const work = await Account.getPow(info.data.frontier);
+
+    // Step 4. Generate a send block using "block_create"
+    const newBlock = await rpc.post('/', {
+      action: 'block_create',
+      type: 'send',
+      key: account.private,
+      account: account.account,
+      destination: toAccountAddress,
+      balance: info.data.balance,
+      amount: rawAmount,
+      previous: info.data.frontier,
+      work,
+    });
+
+    // Step 5. Publish your send block to the network using "process"
+    const processResult = await rpc.post('/', {
+      action: 'process',
+      block: newBlock.data.block,
+    });
+
+    return processResult;
+  }
+
+  static async getAccountBlocks(account) {
+    const blocks = rpc.post('/', {
+      action: 'account_history',
       account,
-      count: 1000
+      count: 1000,
+    });
+
+    return blocks;
+  }
+
+  static async getOnePendingBlocks(address) {
+    const { data } = await rpc.post('/', {
+      action: 'accounts_pending',
+      accounts: [address],
+      count: 1,
+    });
+
+    console.log(await pow('BD9F737DDECB0A34DFBA0EDF7017ACB0EF0AA04A6F7A73A406191EF80BB290AD'));
+
+    if (!data.blocks) return false;
+
+    const blocks = data.blocks[address];
+
+    if (Array.isArray(blocks) && blocks.length > 0) return blocks[0];
+
+    return false;
+  }
+
+  static async getPow(hash) {
+    const workResult = await rpc.post('/', {
+      action: 'work_generate',
+      hash,
+    });
+
+    return workResult.data.work;
+  }
+
+  static async receive(account, sendBlockHash) {
+    // Step 1. Retrieve your account info to get your latest block hash (frontier)
+    const info = await rpc.post('/', {
+      action: 'account_info',
+      account: account.account,
+      count: 1,
+    });
+
+    const previous = info.data.frontier || account.public;
+
+    // Step 2. Generate Proof of Work from your account's frontier
+    const work = await Account.getPow(previous);
+
+    // Step 3. Generate a open/receive block using "block_create"
+    const newBlock = await rpc.post('/', {
+      action: 'block_create',
+      type: previous === account.public ? 'open' : 'receive',
+      key: account.private,
+      account: account.account,
+      source: sendBlockHash,
+      work,
+      previous,
+      representative:
+        'bus_3h7qonaut7wkedquso3hakhpp79rp4bsysggtko519qm6bfrrua8dqbhge77',
+    });
+
+    // Step 4. Publish your open block to the network using "process"
+    const processResult = await rpc.post('/', {
+      action: 'process',
+      block: newBlock.data.block,
+    });
+    console.log(
+      'account:',
+      account,
+      'pending:',
+      sendBlockHash,
+      'work:',
+      work,
+      'newBlock:',
+      newBlock.data,
+      'process:',
+      processResult.data,
+    ); // The hash of your newly published open block
+
+    return processResult;
+  }
+
+  static async checkReadyBlocksByAccount(account) {
+    const pending = await this.getOnePendingBlocks(account.account);
+    console.log('Pending block', pending);
+
+    if (pending) await Account.receive(account, pending);
+
+    window.setTimeout(() => {
+      this.checkReadyBlocksByAccount(account);
+    }, 10 * 1000);
+  }
+
+  // TODO
+  async checkReadyBlocks() {
+    console.log('checkReadyBlocks111');
+    this.accounts.forEach((account) => {
+      Account.checkReadyBlocksByAccount(account);
     });
   }
 
-  loadAccounts() {
+  async loadAccounts() {
     if (this.hasAccounts()) {
-      return;
+      this.currentAccount = this.accounts[0];
+      return null;
     }
 
     this.loading = true;
-    store.getItem("accounts").then(accounts => {
+    return store.getItem('wallet-online').then((accounts) => {
       this.accounts = accounts || [];
+      this.currentAccount = this.accounts[0];
       this.loading = false;
     });
   }
 
+  changeCurrentAccount(account) {
+    this.currentAccount = _find(this.accounts, a => a.account === account);
+  }
+
+  updateAccount(account, name) {
+    if (this.currentAccount.account === account) {
+      this.currentAccount = _merge({}, this.currentAccount, { name });
+    }
+
+    this.accounts = _map(this.accounts, (a) => {
+      if (a.account === account) {
+        a.name = name;
+      }
+      return a;
+    });
+
+    store.setItem('wallet-online', this.accounts);
+  }
+
+  deleteAccount(account) {
+    this.accounts = _filter(this.accounts, a => a.account !== account);
+
+    store.setItem('wallet-online', this.accounts);
+  }
+
   getAccountBalance(account) {
-    rpc.post("/", { action: "account_balance", account }).then(res => {
+    rpc.post('/', { action: 'account_balance', account }).then((res) => {
       this.currentAccount = _merge({}, this.currentAccount, res.data);
     });
   }
 
   getAccountHistory(account) {
+    this.currentHistory = {};
     rpc
-      .post("/", { action: "account_history", account, count: 100 })
-      .then(res => {
+      .post('/', { action: 'account_history', account, count: 100 })
+      .then((res) => {
         this.currentHistory = res.data;
       });
   }

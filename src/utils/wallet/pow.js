@@ -1,73 +1,46 @@
-var functions = require("./functions");
+/**
+ * {
+ *   [hash]: {
+ *     state: 'pending', // pending | done
+ *     work: '12ab94bc9332f0' // work result when state equal done
+ *   }
+ * }
+ */
 
-const pow = {};
+/* eslint-disable no-undef */
 
-pow.pow_initiate = (threads, worker_path) => {
-  if (typeof worker_path === "undefined") {
-    worker_path = "js/pow-wasm/";
-  }
-  if (isNaN(threads)) {
-    threads = window.navigator.hardwareConcurrency - 1;
-  }
-  let workers = [];
-  for (let i = 0; i < threads; i++) {
-    workers[i] = new Worker(`${worker_path}thread.js`);
-  }
-  return workers;
+const dict = {};
+
+const NUM_THREADS = 3;
+const workers = pow_initiate(NUM_THREADS, '/js/pow-wasm/');
+
+const createTask = async (hash) => {
+  const work = { state: 'pending', spent_MS: 0 };
+  const promise = new Promise((resolve) => {
+    let start = 0;
+    pow_callback(workers, hash, () => {
+      start = Date.now();
+    }, (data) => {
+      work.work = data;
+      work.spend_MS = Date.now() - start;
+      resolve(data);
+    });
+  });
+  work.promise = promise;
+  dict[hash] = work;
+
+  return promise;
 };
 
-pow.pow_start = (workers, hash) => {
-  if (hash instanceof Uint8Array && hash.length === 32) {
-    const threads = workers.length;
-    for (let i = 0; i < threads; i++) {
-      workers[i].postMessage(hash);
-    }
+const get = async (hash) => {
+  if (dict[hash]) {
+    const work = dict[hash];
+    if (work.state === 'done') return work.work;
+    return work.promise;
   }
+
+  return createTask(hash);
 };
 
-pow.pow_terminate = workers => {
-  const threads = workers.length;
-  for (let i = 0; i < threads; i++) {
-    workers[i].terminate();
-  }
-};
-
-pow.pow_callback = (workers, hash, ready, callback) => {
-  if (hash.length === 64 && typeof callback === "function") {
-    const threads = workers.length;
-    for (let i = 0; i < threads; i++) {
-      workers[i].onmessage = e => {
-        var result = e.data;
-        if (result === "ready") {
-          workers[i].postMessage(hash);
-          ready();
-        } else if (result !== false && result !== "0000000000000000") {
-          pow.pow_terminate(workers);
-          callback(result);
-        } else workers[i].postMessage(hash);
-      };
-    }
-  }
-};
-
-// hash_hex input as text, callback as function
-pow.run = (hash_hex, threads, callback, worker_path) => {
-  const isValid = /^[0123456789ABCDEF]+$/.test(hash_hex);
-  if (isValid && hash_hex.length === 64) {
-    const hash = functions.hex_uint8(hash_hex);
-    let workers = pow.pow_initiate(threads, worker_path);
-    pow.pow_start(workers, hash);
-    pow.pow_callback(
-      workers,
-      hash,
-      function() {
-        console.log("Working locally on " + hash);
-      },
-      callback
-    );
-  } else {
-    throw new Error("Invalid hash:", hash_hex);
-  }
-};
-
-export default pow;
+export default get;
+/* eslint-enable no-undef */

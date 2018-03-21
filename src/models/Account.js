@@ -70,7 +70,7 @@ class Account {
     });
 
     // Step 3. Generate Proof of Work from your account's frontier
-    const work = await Account.getPow(info.data.frontier);
+    const work = await pow(info.data.frontier);
 
     // Step 4. Generate a send block using "block_create"
     const newBlock = await rpc.post('/', {
@@ -84,6 +84,9 @@ class Account {
       previous: info.data.frontier,
       work,
     });
+
+    // push pow calc pool
+    pow(newBlock.data.hash);
 
     // Step 5. Publish your send block to the network using "process"
     const processResult = await rpc.post('/', {
@@ -111,8 +114,6 @@ class Account {
       count: 1,
     });
 
-    console.log(await pow('BD9F737DDECB0A34DFBA0EDF7017ACB0EF0AA04A6F7A73A406191EF80BB290AD'));
-
     if (!data.blocks) return false;
 
     const blocks = data.blocks[address];
@@ -120,15 +121,6 @@ class Account {
     if (Array.isArray(blocks) && blocks.length > 0) return blocks[0];
 
     return false;
-  }
-
-  static async getPow(hash) {
-    const workResult = await rpc.post('/', {
-      action: 'work_generate',
-      hash,
-    });
-
-    return workResult.data.work;
   }
 
   static async receive(account, sendBlockHash) {
@@ -142,7 +134,7 @@ class Account {
     const previous = info.data.frontier || account.public;
 
     // Step 2. Generate Proof of Work from your account's frontier
-    const work = await Account.getPow(previous);
+    const work = await pow(previous);
 
     // Step 3. Generate a open/receive block using "block_create"
     const newBlock = await rpc.post('/', {
@@ -157,30 +149,31 @@ class Account {
         'bus_3h7qonaut7wkedquso3hakhpp79rp4bsysggtko519qm6bfrrua8dqbhge77',
     });
 
+    // push pow calc pool
+    pow(newBlock.data.hash);
+
     // Step 4. Publish your open block to the network using "process"
     const processResult = await rpc.post('/', {
       action: 'process',
       block: newBlock.data.block,
     });
-    console.log(
-      'account:',
-      account,
-      'pending:',
-      sendBlockHash,
-      'work:',
-      work,
-      'newBlock:',
-      newBlock.data,
-      'process:',
-      processResult.data,
-    ); // The hash of your newly published open block
 
     return processResult;
   }
 
+  static async powPoolInit(account) {
+    const info = await rpc.post('/', {
+      action: 'account_info',
+      account: account.account,
+      count: 1,
+    });
+    const hash = info.data.frontier || account.public;
+
+    pow(hash);
+  }
+
   static async checkReadyBlocksByAccount(account) {
     const pending = await this.getOnePendingBlocks(account.account);
-    console.log('Pending block', pending);
 
     if (pending) await Account.receive(account, pending);
 
@@ -189,11 +182,10 @@ class Account {
     }, 10 * 1000);
   }
 
-  // TODO
-  async checkReadyBlocks() {
-    console.log('checkReadyBlocks111');
+  async accountInit() {
     this.accounts.forEach((account) => {
       Account.checkReadyBlocksByAccount(account);
+      Account.powPoolInit(account);
     });
   }
 

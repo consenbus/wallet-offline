@@ -12,22 +12,26 @@
 const dict = {};
 
 const NUM_THREADS = 3;
-const workers = pow_initiate(NUM_THREADS, '/js/pow-wasm/');
 
-const createTask = async (hash) => {
+const createTask = (hash) => {
   const work = { state: 'pending', spent_MS: 0 };
+  dict[hash] = work;
   const promise = new Promise((resolve) => {
     let start = 0;
+    const workers = pow_initiate(NUM_THREADS, '/js/pow-wasm/');
     pow_callback(workers, hash, () => {
       start = Date.now();
+      console.log('Pow calc hash is: %s, startedAt: %d', hash, start);
     }, (data) => {
+      work.state = 'done';
       work.work = data;
-      work.spend_MS = Date.now() - start;
+      work.spent_MS = Date.now() - start;
+
+      console.log('Pow calc hash is: %s, work is: %s, spent_MS: %d, started: %d, completed: %d', hash, data, work.spent_MS, start, Date.now());
       resolve(data);
     });
   });
   work.promise = promise;
-  dict[hash] = work;
 
   return promise;
 };
@@ -41,6 +45,9 @@ const get = async (hash) => {
 
   return createTask(hash);
 };
+
+window.__powCalcPool = dict;
+window.__pow = get;
 
 export default get;
 /* eslint-enable no-undef */

@@ -5,9 +5,9 @@ import _isEmpty from 'lodash/isEmpty';
 import { withStyles } from 'material-ui/styles';
 import TextField from 'material-ui/TextField';
 // import MenuItem from "material-ui/Menu/MenuItem";
-import Menu, { MenuItem } from 'material-ui/Menu';
-import DownIcon from 'material-ui-icons/KeyboardArrowDown';
+import { MenuItem } from 'material-ui/Menu';
 import Card, { CardActions, CardContent } from 'material-ui/Card';
+import { CircularProgress } from 'material-ui/Progress';
 import Button from 'material-ui/Button';
 import Layout from '../_Layout';
 import Header from './_Header';
@@ -30,7 +30,7 @@ class Send extends Component {
     amount: '',
     amountError: '',
     unit: 'BUS',
-    anchorEl: null,
+    loading: false,
   };
 
   handleChangeForm = name => (event) => {
@@ -40,20 +40,11 @@ class Send extends Component {
     });
   };
 
-  handleClickMenu = (event) => {
-    this.setState({ anchorEl: event.currentTarget });
+  handleChangeSender = (ev) => {
+    this.props.account.changeCurrentAccount(ev.target.value);
   };
 
-  handleCloseMenu = () => {
-    this.setState({ anchorEl: null });
-  };
-
-  handleChangeMenu = account => () => {
-    this.props.account.changeCurrentAccount(account);
-    this.setState({ anchorEl: null });
-  };
-
-  handleSend = (e) => {
+  handleSend = async (e) => {
     e.preventDefault();
     if (this.state.account === '') {
       this.setState({ accountError: 'Recipient address must not be blank.' });
@@ -68,12 +59,15 @@ class Send extends Component {
     const {
       amount, unit, account: toAccountAddress,
     } = this.state;
-    this.props.account
+
+    this.setState({ loading: true });
+    await this.props.account
       .send(amount, unit, toAccountAddress);
+    this.setState({ loading: false });
   };
 
   render() {
-    const { classes } = this.props;
+    const { classes, account: { accounts } } = this.props;
     const account = this.props.account.currentAccount;
     const inputProps = {
       disableUnderline: true,
@@ -86,36 +80,11 @@ class Send extends Component {
       shrink: true,
       className: classes.textFieldFormLabel,
     };
+    const { loading } = this.state;
 
     return (
       <Layout active="send">
         <Header title="Send" />
-
-        {/* account selector */}
-        <div style={{ textAlign: 'center', marginTop: '30px' }}>
-          <Button
-            aria-owns={this.state.anchorEl ? 'simple-menu' : null}
-            aria-haspopup="true"
-            onClick={this.handleClickMenu}
-          >
-            {account.name} <DownIcon />
-          </Button>
-          <Menu
-            id="simple-menu"
-            anchorEl={this.state.anchorEl}
-            open={Boolean(this.state.anchorEl)}
-            onClose={this.handleCloseMenu}
-          >
-            {_map(this.props.account.accounts, a => (
-              <MenuItem
-                key={a.account}
-                onClick={this.handleChangeMenu(a.account)}
-              >
-                {a.name || 'null'}
-              </MenuItem>
-            ))}
-          </Menu>
-        </div>
 
         <div style={{ padding: 20 }}>
           <Card>
@@ -126,6 +95,27 @@ class Send extends Component {
                 autoComplete="off"
                 onSubmit={this.handleSend}
               >
+                <TextField
+                  id="select-account"
+                  select
+                  label="Sender"
+                  value={account.account}
+                  onChange={this.handleChangeSender}
+                  helperText="Choice sender"
+                  margin="normal"
+                  InputProps={{
+                    disableUnderline: true,
+                    className: classes.textFieldUnit,
+                  }}
+                  InputLabelProps={inputLabelProps}
+                >
+                  {_map(accounts, x => (
+                    <MenuItem key={x.account} value={x.account}>
+                      {x.name || x.account}
+                    </MenuItem>
+                  ))}
+                </TextField>
+
                 <TextField
                   id="full-width"
                   label="Recipient"
@@ -174,34 +164,25 @@ class Send extends Component {
                     </MenuItem>
                   ))}
                 </TextField>
-
-                {/*
-                <TextField
-                  id="password"
-                  label="Password"
-                  type="password"
-                  InputProps={inputProps}
-                  InputLabelProps={inputLabelProps}
-                  autoComplete="current-password"
-                  margin="normal"
-                  fullWidth
-                />
-                */}
               </form>
             </CardContent>
             <CardActions>
-              <Button
-                variant="raised"
-                color="secondary"
-                fullWidth
-                style={{
-                  margin: '0 12px 20px 12px',
-                  color: 'white',
-                }}
-                onClick={this.handleSend}
-              >
-                Send
-              </Button>
+              <div className={classes.wrapper}>
+                <Button
+                  variant="raised"
+                  color="secondary"
+                  fullWidth
+                  style={{
+                    margin: '0 12px 20px 12px',
+                    color: 'white',
+                  }}
+                  disabled={loading}
+                  onClick={this.handleSend}
+                >
+                  Send
+                </Button>
+                {loading && <CircularProgress size={24} className={classes.buttonProgress} />}
+              </div>
             </CardActions>
           </Card>
         </div>

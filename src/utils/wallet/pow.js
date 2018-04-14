@@ -29,6 +29,7 @@ const expired = 7 * 86400 * 1000;
 const restore = () => {
   const now = Date.now();
   store.getItem(storeKey).then((works) => {
+    if (!works) return;
     works.forEach(([hash, work, completed]) => {
       // ignore too old item
       if (now - completed > expired) return;

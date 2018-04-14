@@ -1,3 +1,4 @@
+import blake from 'blakejs';
 import { extendObservable } from 'mobx';
 import _isEmpty from 'lodash/isEmpty';
 import _merge from 'lodash/merge';
@@ -8,6 +9,33 @@ import rpc from '../utils/rpc';
 import pow from '../utils/wallet/pow';
 import store from '../utils/store';
 import converter from '../utils/converter';
+import sign from '../utils/wallet/sign';
+import nacl from '../utils/wallet/nacl';
+import { dec2hex, uint8_hex, hex_uint8, accountFromHexKey } from '../utils/wallet/functions';
+
+// get public from seed
+// throw exception if seed.length not equal 32
+const newKeyFromSeed = (seed) => {
+  if (seed.length !== 32) throw new Error('Seed lenght must be 32');
+
+  const indexValue = 0;
+  const index = (0, hex_uint8)((0, dec2hex)(indexValue, 4));
+
+  const context = blake.blake2bInit(32);
+  blake.blake2bUpdate(context, seed);
+  blake.blake2bUpdate(context, index);
+
+  const newKey = blake.blake2bFinal(context);
+  const privateKey = (0, uint8_hex)(newKey);
+  const publicKey = uint8_hex(nacl.sign.keyPair.fromSecretKey(newKey).publicKey);
+  const address = accountFromHexKey(publicKey);
+
+  return {
+    private: privateKey,
+    public: publicKey,
+    account: address,
+  };
+};
 
 class Account {
   constructor() {
@@ -26,28 +54,26 @@ class Account {
 
   async createAccount(name) {
     this.createLoading = true;
-    const walletResult = await rpc.post('/', { action: 'wallet_create' });
-    const seed = walletResult.data.wallet;
-    const keys = await rpc.post('/', {
-      action: 'deterministic_key',
-      seed,
-      index: '0',
-    });
-    this.saveAccount(name, keys, seed);
+    // old code base on online
+    // const walletResult = await rpc.post('/', { action: 'wallet_create' });
+    // const seed = walletResult.data.wallet;
+
+    // new code base on offline
+    const seed = nacl.randomBytes(32);
+    const keys = newKeyFromSeed(seed);
+
+    const seedHex = uint8_hex(seed);
+    this.saveAccount(name, keys, seedHex);
   }
 
   async restoreAccount(name, seed) {
     this.createLoading = true;
-    const keys = await rpc.post('/', {
-      action: 'deterministic_key',
-      seed,
-      index: '0',
-    });
+    const keys = newKeyFromSeed(seed);
     this.saveAccount(name, keys, seed);
   }
 
   async saveAccount(name, keys, seed) {
-    this.currentAccount = _merge(keys.data, { name, seed });
+    this.currentAccount = _merge(keys, { name, seed });
     this.accounts.push(this.currentAccount);
     const storeResult = await store.setItem('wallet-online', this.accounts);
     this.accounts = storeResult;
@@ -72,29 +98,34 @@ class Account {
     // Step 3. Generate Proof of Work from your account's frontier
     const work = await pow(info.data.frontier);
 
-    // Step 4. Generate a send block using "block_create"
-    const newBlock = await rpc.post('/', {
-      action: 'block_create',
+    // Step 4. Generate a send block
+    const block = {
       type: 'send',
-      key: account.private,
-      account: account.account,
-      destination: toAccountAddress,
-      balance: info.data.balance,
-      amount: rawAmount,
       previous: info.data.frontier,
+      // account: account.account,
+      destination: toAccountAddress,
+      balance: dec2hex(converter.minus(info.data.balance, rawAmount)).toUpperCase(),
       work,
-    });
+    };
+    console.log(JSON.stringify(block, null, 2));
 
-    // push pow calc pool
-    pow(newBlock.data.hash);
+    block.signature = sign(block, account.private);
 
     // Step 5. Publish your send block to the network using "process"
-    const processResult = await rpc.post('/', {
+    const res = await rpc.post('/', {
       action: 'process',
-      block: newBlock.data.block,
+      block: JSON.stringify(block),
     });
 
-    return processResult;
+    if (res.data.error) {
+      console.error(res);
+      throw new Error(res.data.error);
+    }
+
+    // push the newist hash to pow calc pool
+    pow(res.data.hash);
+
+    return res;
   }
 
   static async getAccountBlocks(account) {
@@ -136,29 +167,27 @@ class Account {
     // Step 2. Generate Proof of Work from your account's frontier
     const work = await pow(previous);
 
-    // Step 3. Generate a open/receive block using "block_create"
-    const newBlock = await rpc.post('/', {
-      action: 'block_create',
+    // Step 3. Generate a open/receive block
+    const block = {
       type: previous === account.public ? 'open' : 'receive',
-      key: account.private,
       account: account.account,
+      representative: 'bus_3h7qonaut7wkedquso3hakhpp79rp4bsysggtko519qm6bfrrua8dqbhge77',
       source: sendBlockHash,
       work,
-      previous,
-      representative:
-        'bus_3h7qonaut7wkedquso3hakhpp79rp4bsysggtko519qm6bfrrua8dqbhge77',
-    });
-
-    // push pow calc pool
-    pow(newBlock.data.hash);
+    };
+    if (block.type !== 'open') block.previous = previous;
+    block.signature = sign(block, account.private);
 
     // Step 4. Publish your open block to the network using "process"
-    const processResult = await rpc.post('/', {
+    const res = await rpc.post('/', {
       action: 'process',
-      block: newBlock.data.block,
+      block,
     });
 
-    return processResult;
+    // push newist hash to pow calc pool
+    pow(res.data.hash);
+
+    return res;
   }
 
   static async powPoolInit(account) {
@@ -184,7 +213,7 @@ class Account {
 
   async accountInit() {
     this.accounts.forEach((account) => {
-      Account.checkReadyBlocksByAccount(account);
+      // Account.checkReadyBlocksByAccount(account);
       Account.powPoolInit(account);
     });
   }
@@ -197,7 +226,7 @@ class Account {
 
     this.loading = true;
     return store.getItem('wallet-online').then((accounts) => {
-      this.accounts = accounts || [];
+      this.accounts = _filter(accounts, x => !x.error) || [];
       this.currentAccount = this.accounts[0];
       this.loading = false;
     });

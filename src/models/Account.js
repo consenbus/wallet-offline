@@ -13,6 +13,8 @@ import sign from '../utils/wallet/sign';
 import nacl from '../utils/wallet/nacl';
 import { dec2hex, uint8_hex, hex_uint8, accountFromHexKey, keyFromAccount } from '../utils/wallet/functions';
 
+const representative = 'bus_3h7qonaut7wkedquso3hakhpp79rp4bsysggtko519qm6bfrrua8dqbhge77';
+
 // get public from seed
 // throw exception if seed.length not equal 32
 const newKeyFromSeed = (seed) => {
@@ -174,18 +176,28 @@ class Account {
     // Step 3. Generate a open/receive block
     const block = {
       type: previous === account.public ? 'open' : 'receive',
-      account: account.account,
-      representative: 'bus_3h7qonaut7wkedquso3hakhpp79rp4bsysggtko519qm6bfrrua8dqbhge77',
+      account: keyFromAccount(account.account),
+      // account: account.account,
+      representative: keyFromAccount(representative),
       source: sendBlockHash,
       work,
     };
     if (block.type !== 'open') block.previous = previous;
-    block.signature = sign(block, account.private);
+    const signature = sign(block, account.private);
 
     // Step 4. Publish your open block to the network using "process"
+    const newBlock = {
+      type: block.type,
+      source: sendBlockHash,
+      account: account.account,
+      previous,
+      representative,
+      work,
+      signature,
+    };
     const res = await rpc.post('/', {
       action: 'process',
-      block,
+      block: JSON.stringify(newBlock),
     });
 
     // push newist hash to pow calc pool
@@ -217,7 +229,7 @@ class Account {
 
   async accountInit() {
     this.accounts.forEach((account) => {
-      // Account.checkReadyBlocksByAccount(account);
+      Account.checkReadyBlocksByAccount(account);
       Account.powPoolInit(account);
     });
   }

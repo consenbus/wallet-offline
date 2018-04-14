@@ -3,7 +3,6 @@ const nacl = require('./nacl'); // We are using a forked version of tweetnacl, s
 const blake = require('blakejs');
 
 function sendSign({ previous, destination, balance }, privateKey) {
-  console.log(previous, destination, balance);
   const context = blake.blake2bInit(32, null);
   blake.blake2bUpdate(context, (0, _functions.hex_uint8)(previous));
   blake.blake2bUpdate(context, (0, _functions.hex_uint8)(destination));
@@ -17,24 +16,24 @@ function sendSign({ previous, destination, balance }, privateKey) {
   return (0, _functions.uint8_hex)(xsign);
 }
 
-function receiveSign({ previous, destination, balance }, privateKey) {
+function openSign({ account, representative, source }, privateKey) {
   const context = blake.blake2bInit(32, null);
-  blake.blake2bUpdate(context, (0, _functions.hex_uint8)(previous));
-  blake.blake2bUpdate(context, (0, _functions.hex_uint8)(destination));
-  blake.blake2bUpdate(context, (0, _functions.hex_uint8)(balance));
+  blake.blake2bUpdate(context, (0, _functions.hex_uint8)(source));
+  blake.blake2bUpdate(context, (0, _functions.hex_uint8)(representative));
+  blake.blake2bUpdate(context, (0, _functions.hex_uint8)(account));
   const hash = (0, _functions.uint8_hex)(blake.blake2bFinal(context));
 
+  const xhash = (0, _functions.hex_uint8)(hash);
   const xkey = (0, _functions.hex_uint8)(privateKey);
   // console.log(hash, xhash);
-  const xsign = nacl.sign.detached(hash, xkey);
+  const xsign = nacl.sign.detached(xhash, xkey);
   return (0, _functions.uint8_hex)(xsign);
 }
 
-function openSign({ previous, destination, balance }, privateKey) {
+function receiveSign({ previous, source }, privateKey) {
   const context = blake.blake2bInit(32, null);
   blake.blake2bUpdate(context, (0, _functions.hex_uint8)(previous));
-  blake.blake2bUpdate(context, (0, _functions.hex_uint8)(destination));
-  blake.blake2bUpdate(context, (0, _functions.hex_uint8)(balance));
+  blake.blake2bUpdate(context, (0, _functions.hex_uint8)(source));
   const hash = (0, _functions.uint8_hex)(blake.blake2bFinal(context));
 
   const xhash = (0, _functions.hex_uint8)(hash);

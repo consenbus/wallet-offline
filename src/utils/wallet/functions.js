@@ -23,8 +23,8 @@ export const accountFromHexKey = function (hex) {
   return `bus_${c_account}${checksum}`;
 };
 
-export const parseXRBAccount = function (str) {
-  const i = str.indexOf('xrb_');
+export const parseBUSAccount = function (str) {
+  const i = str.indexOf('bus_');
   if (i !== -1) {
     const acc = str.slice(i, i + 64);
     try {
@@ -231,7 +231,7 @@ function array_crop(array) {
 
 export const keyFromAccount = function (account) {
   if (
-    (account.startsWith('xrb_1') || account.startsWith('xrb_3')) &&
+    (account.startsWith('bus_1') || account.startsWith('bus_3')) &&
     account.length === 64
   ) {
     const account_crop = account.substring(4, 64);
@@ -245,7 +245,7 @@ export const keyFromAccount = function (account) {
         const key = uint4_hex(key_uint4);
         return key;
       } throw new Error('Checksum incorrect.');
-    } else throw new Error('Invalid XRB account.');
+    } else throw new Error('Invalid BUS account.');
   }
-  throw new Error('Invalid XRB account.');
+  throw new Error('Invalid BUS account.');
 };

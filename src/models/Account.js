@@ -177,7 +177,6 @@ class Account {
     const block = {
       type: previous === account.public ? 'open' : 'receive',
       account: keyFromAccount(account.account),
-      // account: account.account,
       representative: keyFromAccount(representative),
       source: sendBlockHash,
       work,

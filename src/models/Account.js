@@ -11,7 +11,7 @@ import store from '../utils/store';
 import converter from '../utils/converter';
 import sign from '../utils/wallet/sign';
 import nacl from '../utils/wallet/nacl';
-import { dec2hex, uint8_hex, hex_uint8, accountFromHexKey } from '../utils/wallet/functions';
+import { dec2hex, uint8_hex, hex_uint8, accountFromHexKey, keyFromAccount } from '../utils/wallet/functions';
 
 // get public from seed
 // throw exception if seed.length not equal 32
@@ -102,19 +102,23 @@ class Account {
     const block = {
       type: 'send',
       previous: info.data.frontier,
-      // account: account.account,
-      destination: toAccountAddress,
-      balance: dec2hex(converter.minus(info.data.balance, rawAmount)).toUpperCase(),
+      destination: keyFromAccount(toAccountAddress),
+      balance: dec2hex(converter.minus(info.data.balance, rawAmount), 16).toUpperCase(),
       work,
     };
-    console.log(JSON.stringify(block, null, 2));
 
-    block.signature = sign(block, account.private);
-
+    const signature = sign(block, account.private);
     // Step 5. Publish your send block to the network using "process"
     const res = await rpc.post('/', {
       action: 'process',
-      block: JSON.stringify(block),
+      block: JSON.stringify({
+        type: 'send',
+        previous: block.previous,
+        destination: toAccountAddress,
+        balance: block.balance,
+        work,
+        signature,
+      }),
     });
 
     if (res.data.error) {

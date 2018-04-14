@@ -58,10 +58,12 @@ function changeSign({ previous, destination, balance }, privateKey) {
   return (0, _functions.uint8_hex)(xsign);
 }
 
-export default function sign(params, privateKey) {
+function sign(params, privateKey) {
   if (params.type === 'send') return sendSign(params, privateKey);
   if (params.type === 'receive') return receiveSign(params, privateKey);
   if (params.type === 'open') return openSign(params, privateKey);
   if (params.type === 'change') return changeSign(params, privateKey);
   throw new Error('Unkonw block type');
 }
+
+module.exports = sign;

@@ -30,11 +30,11 @@ const converter = {
   },
 
   minus(base /* : string */, minus /* : string */) {
-    new BigNumber(base).minus(new BigNumber(minus)).toFixed(0);
+    return new BigNumber(base).minus(new BigNumber(minus)).toFixed(0);
   },
 
   plus(base /* : string */, plus /* : string */) {
-    new BigNumber(base).plus(new BigNumber(plus)).toFixed(0);
+    return new BigNumber(base).plus(new BigNumber(plus)).toFixed(0);
   },
 };
 

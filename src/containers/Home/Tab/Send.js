@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
+import { Redirect } from 'react-router-dom';
 import _map from 'lodash/map';
 import _isEmpty from 'lodash/isEmpty';
 import { withStyles } from 'material-ui/styles';
@@ -31,6 +32,7 @@ class Send extends Component {
     amountError: '',
     unit: 'BUS',
     loading: false,
+    success: false,
   };
 
   handleChangeForm = name => (event) => {
@@ -63,7 +65,10 @@ class Send extends Component {
     this.setState({ loading: true });
     await this.props.account
       .send(amount, unit, toAccountAddress);
-    this.setState({ loading: false });
+    this.setState({
+      success: true,
+      loading: false,
+    });
   };
 
   render() {
@@ -80,7 +85,11 @@ class Send extends Component {
       shrink: true,
       className: classes.textFieldFormLabel,
     };
-    const { loading } = this.state;
+    const { loading, success } = this.state;
+
+    if (success) {
+      return <Redirect to="/" />;
+    }
 
     return (
       <Layout active="send">

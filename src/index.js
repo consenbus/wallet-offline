@@ -8,7 +8,7 @@ import blue from 'material-ui/colors/blue';
 import grey from 'material-ui/colors/grey';
 import 'typeface-roboto';
 import models from './models';
-import registerServiceWorker from './utils/registerServiceWorker';
+// import registerServiceWorker from './utils/registerServiceWorker';
 
 // Styles
 // import "semantic-ui-css/semantic.css";
@@ -48,4 +48,4 @@ ReactDOM.render(
   document.getElementById('root'),
 );
 
-registerServiceWorker();
+// registerServiceWorker();

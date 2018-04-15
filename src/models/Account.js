@@ -56,11 +56,7 @@ class Account {
 
   async createAccount(name) {
     this.createLoading = true;
-    // old code base on online
-    // const walletResult = await rpc.post('/', { action: 'wallet_create' });
-    // const seed = walletResult.data.wallet;
 
-    // new code base on offline
     const seed = nacl.randomBytes(32);
     const keys = newKeyFromSeed(seed);
 
@@ -70,7 +66,7 @@ class Account {
 
   async restoreAccount(name, seed) {
     this.createLoading = true;
-    const keys = newKeyFromSeed(seed);
+    const keys = newKeyFromSeed(hex_uint8(seed));
     this.saveAccount(name, keys, seed);
   }
 

@@ -74,8 +74,14 @@ class Show extends React.Component {
   }
 
   componentWillMount() {
-    const hash = this.props.match.params.hash;
-    this.getBlockData(hash);
+    const currentHash = this.props.match.params.hash;
+    this.getBlockData(currentHash);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const lastHash = this.props.match.params.hash;
+    const currentHash = nextProps.match.params.hash;
+    if (currentHash !== lastHash) this.getBlockData(currentHash);
   }
 
   async getBlockData(hash) {

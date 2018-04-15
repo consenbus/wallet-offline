@@ -55,6 +55,12 @@ class Account extends React.Component {
     this.getAccountInfo(account);
   }
 
+  componentWillReceiveProps(nextProps) {
+    const account = this.props.match.params.account;
+    const currentAccount = nextProps.match.params.account;
+    if (currentAccount !== account) this.getAccountInfo(currentAccount);
+  }
+
   async getHistsory(account) {
     this.setState({
       history: [],

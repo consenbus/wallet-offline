@@ -10,8 +10,6 @@ import CameraAltIcon from 'material-ui-icons/CameraAlt';
 import SendIcon from 'material-ui-icons/Send';
 import SettingsIcon from 'material-ui-icons/Settings';
 
-import AppSearch from '../Explorer/_Search';
-
 const styles = {
   root: {
     width: '100%',
@@ -28,12 +26,6 @@ const styles = {
     paddingLeft: '5px',
     paddingRight: '5px',
   },
-  search: {
-    position: 'fixed',
-    top: '15px',
-    right: '5px',
-    color: '#fff',
-  },
 };
 
 class Layout extends Component {
@@ -42,12 +34,7 @@ class Layout extends Component {
 
     return (
       <div>
-        <div style={{ marginBottom: '56px' }}>
-          {this.props.children}
-          <div className={classes.search}>
-            <AppSearch />
-          </div>
-        </div>
+        <div style={{ marginBottom: '56px' }}>{this.props.children}</div>
         <BottomNavigation value={active} showLabels className={classes.root}>
           <BottomNavigationAction
             label="Home"

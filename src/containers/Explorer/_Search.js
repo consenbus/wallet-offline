@@ -85,9 +85,6 @@ const styles = theme => ({
     '&:focus': {
       outline: 0,
     },
-    '&::placeholder': {
-      color: blue.A100,
-    },
   },
 });
 

@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { observer, inject } from 'mobx-react';
+import { withStyles } from 'material-ui/styles';
 
 import List, { ListItem, ListItemText } from 'material-ui/List';
 import Card, { CardHeader } from 'material-ui/Card';
 import IconButton from 'material-ui/IconButton';
+import Paper from 'material-ui/Paper';
 import Divider from 'material-ui/Divider';
 import Avatar from 'material-ui/Avatar';
 import AddIcon from 'material-ui-icons/Add';
@@ -13,10 +15,16 @@ import _map from 'lodash/map';
 
 import Layout from '../_Layout';
 import Header from './_Header';
+import AppSearch from '../../Explorer/_Search';
+
+const styles = {
+  search: {
+  },
+};
 
 class Index extends Component {
   render() {
-    const { account } = this.props;
+    const { account, classes } = this.props;
     const accounts = account.accounts;
 
     const action = (
@@ -29,6 +37,9 @@ class Index extends Component {
       <Layout active="home">
         <Header />
 
+        <div className={classes.search}>
+          <Paper><AppSearch /></Paper>
+        </div>
         <div style={{ padding: 20 }}>
           <Card>
             <CardHeader
@@ -63,4 +74,4 @@ class Index extends Component {
   }
 }
 
-export default inject('account')(observer(Index));
+export default withStyles(styles)(inject('account')(observer(Index)));

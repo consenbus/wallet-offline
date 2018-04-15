@@ -54,11 +54,11 @@ const getTableData = (block) => {
     ['Type', <code>{type}</code>],
   ];
 
-  if (account) data.push(['Account', account]);
+  if (account) data.push(['Account', <Link to={`/explorer/accounts/${account}`}>{account}</Link>]);
   if (balance) data.push(['Balance', `${converter.unit(hex2dec(balance || 0), 'raw', 'BUS')} BUS`]);
-  if (destination) data.push(['Destination', destination]);
+  if (destination) data.push(['Destination', <Link to={`/explorer/accounts/${destination}`}>{destination}</Link>]);
   if (amount) data.push(['Amount', `${converter.unit(amount || 0, 'raw', 'BUS')} BUS`]);
-  if (source) data.push(['Source', block.source]);
+  if (source) data.push(['Source', <Link to={`/explorer/blocks/${source}`}>{source}</Link>]);
   if (previous) data.push(['Previous', <Link to={`/explorer/blocks/${previous}`}>{previous}</Link>]);
   data.push(['Work', <code>{work}</code>]);
   data.push(['Signature', <code>{signature}</code>]);

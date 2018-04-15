@@ -1,51 +1,53 @@
-import React, { Component } from "react";
-import { Link } from "react-router-dom";
-import { withStyles } from "material-ui/styles";
-import BottomNavigation, {
-  BottomNavigationAction
-} from "material-ui/BottomNavigation";
+import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
+import { withStyles } from 'material-ui/styles';
+import BottomNavigation, { BottomNavigationAction } from 'material-ui/BottomNavigation';
 
 // icons
-import HomeIcon from "material-ui-icons/Home";
-import ReceiptIcon from "material-ui-icons/Receipt";
-import CameraAltIcon from "material-ui-icons/CameraAlt";
-import SendIcon from "material-ui-icons/Send";
-import SettingsIcon from "material-ui-icons/Settings";
+import HomeIcon from 'material-ui-icons/Home';
+import ReceiptIcon from 'material-ui-icons/Receipt';
+import CameraAltIcon from 'material-ui-icons/CameraAlt';
+import SendIcon from 'material-ui-icons/Send';
+import SettingsIcon from 'material-ui-icons/Settings';
+
+import AppSearch from './_Search';
 
 const styles = {
   root: {
-    width: "100%",
-    bottom: "0px",
-    left: "0px",
-    top: "auto",
-    right: "auto",
-    position: "fixed",
-    zIndex: "101",
-    margin: "0em"
+    width: '100%',
+    bottom: '0px',
+    left: '0px',
+    top: 'auto',
+    right: 'auto',
+    position: 'fixed',
+    zIndex: '101',
+    margin: '0em',
   },
   tab: {
-    minWidth: "60px",
-    paddingLeft: "5px",
-    paddingRight: "5px"
-  }
+    minWidth: '60px',
+    paddingLeft: '5px',
+    paddingRight: '5px',
+  },
+  search: {
+    position: 'fixed',
+    top: '15px',
+    right: '5px',
+    color: '#fff',
+  },
 };
 
 class Layout extends Component {
-  state = {
-    value: 0
-  };
-
-  handleChange = (event, value) => {
-    this.setState({ value });
-  };
-
   render() {
     const { classes, active } = this.props;
-    // const { value } = this.state;
 
     return (
       <div>
-        <div style={{ marginBottom: "56px" }}>{this.props.children}</div>
+        <div style={{ marginBottom: '56px' }}>
+          {this.props.children}
+          <div className={classes.search}>
+            <AppSearch />
+          </div>
+        </div>
         <BottomNavigation value={active} showLabels className={classes.root}>
           <BottomNavigationAction
             label="Home"

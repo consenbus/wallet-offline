@@ -33,6 +33,12 @@ const styles = {
     backgroundColor: green[500],
     marginRight: '10px',
   },
+  error: {
+    border: '1px solid #ffa39e',
+    backgroundColor: '#fff1f0',
+    padding: '5px',
+    margin: '10px',
+  },
 };
 
 class Show extends Component {
@@ -48,6 +54,7 @@ class Show extends Component {
     const addr = this.props.match.params.account;
     const current = account.currentAccount;
     const history = account.currentHistory;
+
     const action = () => (
       <IconButton
         color="inherit"
@@ -87,7 +94,7 @@ class Show extends Component {
 
         <List>
           {_map(history.history, h => (
-            <ListItem key={h.hash}>
+            <ListItem component={Link} to={`/blocks/${h.hash}`}>
               {h.type === 'receive' ? (
                 <Avatar className={classes.greenAvatar}>
                   <AddCircleOutlineIcon />

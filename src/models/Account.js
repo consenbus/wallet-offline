@@ -46,6 +46,7 @@ class Account {
       accounts: [],
       currentAccount: {},
       currentHistory: {},
+      currentBlock: {},
       createLoading: false,
     });
   }

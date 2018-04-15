@@ -3,9 +3,9 @@ import SearchIcon from 'material-ui-icons/Search';
 import { Redirect } from 'react-router-dom';
 import _startsWith from 'lodash/startsWith';
 import { withStyles } from 'material-ui/styles';
-import { fade } from "material-ui/styles/colorManipulator";
-import blue from "material-ui/colors/blue";
-import { observer } from 'mobx-react';
+import { fade } from 'material-ui/styles/colorManipulator';
+import blue from 'material-ui/colors/blue';
+import { observer, inject } from 'mobx-react';
 
 const styles = theme => ({
   '@global': {
@@ -97,10 +97,15 @@ class AppSearch extends React.Component {
   handleSearch = (event) => {
     event.preventDefault();
     const input = this.state.input;
+    const account = this.props.account;
     if (_startsWith(input, 'bus_')) {
-      this.setState({ redirectType: '/accounts/' });
+      if (account.accounts.find(x => x.account === input)) {
+        this.setState({ redirectType: '/accounts/' });
+      } else {
+        this.setState({ redirectType: '/explorer/accounts/' });
+      }
     } else {
-      this.setState({ redirectType: '/blocks/' });
+      this.setState({ redirectType: '/explorer/blocks/' });
     }
   };
 
@@ -128,4 +133,4 @@ class AppSearch extends React.Component {
   }
 }
 
-export default withStyles(styles)(observer(AppSearch));
+export default withStyles(styles)(inject('account')(observer(AppSearch)));

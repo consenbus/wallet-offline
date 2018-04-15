@@ -1,18 +1,18 @@
-import React, { Component } from "react";
-import { Link } from "react-router-dom";
-import { observer, inject } from "mobx-react";
+import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
+import { observer, inject } from 'mobx-react';
 
-import List, { ListItem, ListItemText } from "material-ui/List";
-import Card, { CardHeader } from "material-ui/Card";
-import IconButton from "material-ui/IconButton";
-import Divider from "material-ui/Divider";
-import Avatar from "material-ui/Avatar";
-import AddIcon from "material-ui-icons/Add";
-import WalletIcon from "material-ui-icons/AccountBalanceWallet";
+import List, { ListItem, ListItemText } from 'material-ui/List';
+import Card, { CardHeader } from 'material-ui/Card';
+import IconButton from 'material-ui/IconButton';
+import Divider from 'material-ui/Divider';
+import Avatar from 'material-ui/Avatar';
+import AddIcon from 'material-ui-icons/Add';
+import WalletIcon from 'material-ui-icons/AccountBalanceWallet';
+import _map from 'lodash/map';
 
-import Layout from "../_Layout";
-import Header from "./_Header";
-import _map from "lodash/map";
+import Layout from '../_Layout';
+import Header from './_Header';
 
 class Index extends Component {
   render() {
@@ -43,14 +43,14 @@ class Index extends Component {
                 <ListItem
                   key={a.account}
                   component={Link}
-                  to={`/accounts/${a.account || "null"}`}
+                  to={`/accounts/${a.account || 'null'}`}
                 >
                   <Avatar>
                     <WalletIcon />
                   </Avatar>
                   <ListItemText
-                    style={{ textOverflow: "ellipsis", overflow: "hidden" }}
-                    primary={a.name || "Default account"}
+                    style={{ textOverflow: 'ellipsis', overflow: 'hidden' }}
+                    primary={a.name || 'Default account'}
                     secondary={a.account}
                   />
                 </ListItem>
@@ -63,4 +63,4 @@ class Index extends Component {
   }
 }
 
-export default inject("account")(observer(Index));
+export default inject('account')(observer(Index));

@@ -17,6 +17,7 @@ import './assets/css/index.css';
 // Modules
 import CheckAccountRoute from './containers/Home/_CheckAccount';
 import Home from './containers/Home';
+import Explorer from './containers/Explorer';
 import Guide from './containers/Guide';
 
 const history = createBrowserHistory();
@@ -40,6 +41,7 @@ ReactDOM.render(
       <Router history={history}>
         <Switch>
           <Route path="/guide" component={Guide} />
+          <Route path="/explorer" component={Explorer} />
           <CheckAccountRoute path="/" component={Home} />
         </Switch>
       </Router>

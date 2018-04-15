@@ -9,17 +9,16 @@ import pink from 'material-ui/colors/pink';
 import green from 'material-ui/colors/green';
 
 import { LinearProgress } from 'material-ui/Progress';
-import LeftIcon from 'material-ui-icons/KeyboardArrowLeft';
 
-import RegularCard from '../../../components/Cards/RegularCard';
-import ItemGrid from '../../../components/Grid/ItemGrid';
-import Table from '../../../components/Table/Table';
-import converter from '../../../utils/converter';
-import { hex2dec } from '../../../utils/wallet/functions';
+import RegularCard from '../../components/Cards/RegularCard';
+import ItemGrid from '../../components/Grid/ItemGrid';
+import Table from '../../components/Table/Table';
+import converter from '../../utils/converter';
+import { hex2dec } from '../../utils/wallet/functions';
 
-import Layout from '../_Layout';
-import Header from '../Tab/_Header';
-import rpc from '../../../utils/rpc';
+import Layout from '../Home/_Layout';
+import Header from '../Home/Tab/_Header';
+import rpc from '../../utils/rpc';
 
 const styles = {
   avatar: {},
@@ -60,7 +59,7 @@ const getTableData = (block) => {
   if (destination) data.push(['Destination', destination]);
   if (amount) data.push(['Amount', `${converter.unit(amount || 0, 'raw', 'BUS')} BUS`]);
   if (source) data.push(['Source', block.source]);
-  if (previous) data.push(['Previous', <Link to={`/blocks/${previous}`}>{previous}</Link>]);
+  if (previous) data.push(['Previous', <Link to={`/explorer/blocks/${previous}`}>{previous}</Link>]);
   data.push(['Work', <code>{work}</code>]);
   data.push(['Signature', <code>{signature}</code>]);
 
@@ -115,11 +114,7 @@ class Show extends React.Component {
 
     return (
       <Layout active="">
-        <Header
-          title="Back"
-          link="/"
-          icon={LeftIcon}
-        />
+        <Header title="Chain explorer" />
         <Grid container>
           {loading && <LinearProgress />}
           {error && <div className={classes.error}>{error.message}</div>}

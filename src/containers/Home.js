@@ -14,9 +14,6 @@ import AccountNew from './Home/Account/New';
 import AccountRestore from './Home/Account/Restore';
 import AccountEdit from './Home/Account/Edit';
 
-// block
-import BlockShow from './Home/Block/Show';
-
 // other
 // import Example from "./Home/Example";
 import NotFound from '../components/NotFound';
@@ -39,8 +36,6 @@ class Home extends Component {
           <Route exact path="/accounts/:account" component={AccountShow} />
           <Route path="/accounts/:account/edit" component={AccountEdit} />
 
-          {/* block */}
-          <Route path="/blocks/:hash" exact component={BlockShow} />
           {/*
           <Route path="/example" component={Example} />
           */}

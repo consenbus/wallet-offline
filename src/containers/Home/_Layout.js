@@ -10,7 +10,7 @@ import CameraAltIcon from 'material-ui-icons/CameraAlt';
 import SendIcon from 'material-ui-icons/Send';
 import SettingsIcon from 'material-ui-icons/Settings';
 
-import AppSearch from './_Search';
+import AppSearch from '../Explorer/_Search';
 
 const styles = {
   root: {

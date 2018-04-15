@@ -13,7 +13,6 @@ import IconButton from 'material-ui/IconButton';
 import List, { ListItem, ListItemText } from 'material-ui/List';
 import Avatar from 'material-ui/Avatar';
 import EditIcon from 'material-ui-icons/Edit';
-import LeftIcon from 'material-ui-icons/KeyboardArrowLeft';
 import AddCircleOutlineIcon from 'material-ui-icons/AddCircleOutline';
 import RemoveCircleOutlineIcon from 'material-ui-icons/RemoveCircleOutline';
 
@@ -33,11 +32,9 @@ const styles = {
     backgroundColor: green[500],
     marginRight: '10px',
   },
-  error: {
-    border: '1px solid #ffa39e',
-    backgroundColor: '#fff1f0',
-    padding: '5px',
-    margin: '10px',
+  name: {
+    color: '#f6f6f6',
+    fontSize: '20px',
   },
 };
 
@@ -55,24 +52,9 @@ class Show extends Component {
     const current = account.currentAccount;
     const history = account.currentHistory;
 
-    const action = () => (
-      <IconButton
-        color="inherit"
-        component={Link}
-        to={`/accounts/${addr}/edit`}
-      >
-        <EditIcon />
-      </IconButton>
-    );
-
     return (
       <Layout active="">
-        <Header
-          title={current.name || 'null'}
-          link="/"
-          icon={LeftIcon}
-          action={action}
-        />
+        <Header title="Balance" />
         <div
           style={{
             backgroundColor: blue.A700,
@@ -83,6 +65,16 @@ class Show extends Component {
           }}
         >
           <Typography variant="display1" color="inherit">
+            <span className={classes.name}>
+              Account: {current.name}
+              <IconButton
+                color="inherit"
+                component={Link}
+                to={`/accounts/${addr}/edit`}
+              >
+                <EditIcon />
+              </IconButton>
+            </span>
             <span className="ellipsis">
               {converter.unit(current.balance || 0, 'raw', 'BUS')} BUS
             </span>
@@ -94,7 +86,7 @@ class Show extends Component {
 
         <List>
           {_map(history.history, h => (
-            <ListItem component={Link} to={`/blocks/${h.hash}`}>
+            <ListItem component={Link} to={`/explorer/blocks/${h.hash}`}>
               {h.type === 'receive' ? (
                 <Avatar className={classes.greenAvatar}>
                   <AddCircleOutlineIcon />

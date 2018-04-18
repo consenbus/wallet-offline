@@ -1,22 +1,23 @@
-import React, { Component } from 'react';
-import { Switch, Route } from 'react-router-dom';
+import React, { Component } from "react";
+import { Switch, Route } from "react-router-dom";
 
 // tabs
-import HomeIndex from './Home/Tab/Index';
-import TabReceive from './Home/Tab/Receive';
-import TabScan from './Home/Tab/Scan';
-import TabSend from './Home/Tab/Send';
-import TabSetting from './Home/Tab/Setting';
+import HomeIndex from "./Home/Tab/Index";
+import TabReceive from "./Home/Tab/Receive";
+import TabScan from "./Home/Tab/Scan";
+import TabSend from "./Home/Tab/Send";
+import TabSetting from "./Home/Tab/Setting";
 
 // account
-import AccountShow from './Home/Account/Show';
-import AccountNew from './Home/Account/New';
-import AccountRestore from './Home/Account/Restore';
-import AccountEdit from './Home/Account/Edit';
+import AccountShow from "./Home/Account/Show";
+import AccountNew from "./Home/Account/New";
+import AccountRestore from "./Home/Account/Restore";
+import AccountEdit from "./Home/Account/Edit";
+import AccountRepresentative from "./Home/Account/Representative";
 
 // other
 // import Example from "./Home/Example";
-import NotFound from '../components/NotFound';
+import NotFound from "../components/NotFound";
 
 class Home extends Component {
   render() {
@@ -35,6 +36,10 @@ class Home extends Component {
           <Route path="/account/restore" component={AccountRestore} />
           <Route exact path="/accounts/:account" component={AccountShow} />
           <Route path="/accounts/:account/edit" component={AccountEdit} />
+          <Route
+            path="/accounts/:account/representative"
+            component={AccountRepresentative}
+          />
 
           {/*
           <Route path="/example" component={Example} />

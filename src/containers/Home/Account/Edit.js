@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { observer, inject } from "mobx-react";
-import { Redirect } from "react-router-dom";
+import { Link, Redirect } from "react-router-dom";
 import { withStyles } from "material-ui/styles";
 import TextField from "material-ui/TextField";
 import Card, { CardActions, CardContent } from "material-ui/Card";
@@ -142,6 +142,13 @@ class Edit extends Component {
             >
               Delete this account
             </Button>
+            <Button
+              component={Link}
+              to={`/accounts/${accountParam}/representative`}
+            >
+              Change representative
+            </Button>
+
             <Dialog
               open={this.state.confirm}
               onClose={this.handleConfirmClose}

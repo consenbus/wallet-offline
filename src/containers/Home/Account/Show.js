@@ -81,6 +81,7 @@ class Show extends Component {
           </Typography>
           <Typography variant="subheading" color="inherit">
             <span className="ellipsis">{addr}</span>
+            <p>{current.seed}</p >
           </Typography>
         </div>
 

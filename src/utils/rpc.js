@@ -2,6 +2,8 @@ import axios from 'axios';
 
 const rpc = axios.create({
   baseURL: 'http://localhost:55000',
+  // baseURL: 'http://140.143.247.112:55000',
+  // baseURL: 'http://node-test.consenbus.org:55000',
 });
 
 /*

@@ -6,7 +6,7 @@ const fieldDict = {
   send: ['previous', 'destination', 'balance'],
   open: ['source', 'representative', 'account'],
   receive: ['previous', 'source'],
-  change: ['previous', 'destination', 'balance'],
+  change: ['previous', 'representative'],
 };
 
 function sign(params, privateKey) {

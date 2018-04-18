@@ -77,13 +77,6 @@ class Restore extends Component {
       return;
     }
 
-    /*
-    if (this.state.password === "") {
-      this.setState({ passwordError: "Password must not be blank." });
-      return;
-    }
-    */
-
     this.props.account
       .restoreAccount(this.state.name, this.state.seed)
       .then(() => {
@@ -153,22 +146,6 @@ class Restore extends Component {
             value={this.state.seed}
           />
 
-          {/*
-          <TextField
-            id="password"
-            label="Password"
-            placeholder=""
-            helperText={this.state.passwordError}
-            type="password"
-            InputProps={inputProps}
-            InputLabelProps={inputLabelProps}
-            autoComplete="current-password"
-            margin="normal"
-            fullWidth
-            error={!_isEmpty(this.state.passwordError)}
-            onChange={this.handleChange("password")}
-          />
-          */}
         </form>
 
         <div style={{ marginTop: '1rem' }}>

@@ -13,7 +13,8 @@ import sign from '../utils/wallet/sign';
 import nacl from '../utils/wallet/nacl';
 import { dec2hex, uint8_hex, hex_uint8, accountFromHexKey, keyFromAccount } from '../utils/wallet/functions';
 
-const representative = 'bus_3h7qonaut7wkedquso3hakhpp79rp4bsysggtko519qm6bfrrua8dqbhge77';
+// const representative = 'bus_3h7qonaut7wkedquso3hakhpp79rp4bsysggtko519qm6bfrrua8dqbhge77';
+let representative = 'bus_1zrzcmckjhjcpcepmuua8fyqiq4e4exgt1ruxw4hymgfchiyeaa536w8fyot';
 
 // get public from seed
 // throw exception if seed.length not equal 32
@@ -78,6 +79,64 @@ class Account {
     this.accounts = storeResult;
     this.createLoading = false;
     return storeResult;
+  }
+
+  async getRepresentative() {
+    const { currentAccount: { account } } = this;
+    const { data } = await rpc.post('/', {
+      account,
+      action: 'account_representative',
+    });
+
+    return data.representative;
+  }
+
+  async change(representativer) {
+    const account = this.currentAccount;
+
+    // Step 2. Retrieve your account info to get your latest block hash (frontier)
+    // and balance
+    const info = await rpc.post('/', {
+      action: 'account_info',
+      account: account.account,
+      count: 1,
+    });
+
+    // Step 3. Generate Proof of Work from your account's frontier
+    const work = await pow(info.data.frontier);
+
+    // Step 4. Generate a send block
+    const block = {
+      type: 'change',
+      previous: info.data.frontier,
+      representative: representativer,
+      work,
+    };
+
+    const signature = sign(block, account.private);
+    // Step 5. Publish your send block to the network using "process"
+    const res = await rpc.post('/', {
+      action: 'process',
+      block: JSON.stringify({
+        type: 'change',
+        previous: block.previous,
+        representative: block.representative,
+        work,
+        signature,
+      }),
+    });
+
+    if (res.data.error) {
+      console.error(res);
+      throw new Error(res.data.error);
+    }
+
+    representative = representativer;
+
+    // push the newist hash to pow calc pool
+    pow(res.data.hash);
+
+    return res;
   }
 
   async send(amount, unit, toAccountAddress) {

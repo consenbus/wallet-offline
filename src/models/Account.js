@@ -109,22 +109,26 @@ class Account {
     const block = {
       type: 'change',
       previous: info.data.frontier,
-      representative: representativer,
+      representative: keyFromAccount(representativer),
       work,
     };
 
     const signature = sign(block, account.private);
     // Step 5. Publish your send block to the network using "process"
-    const res = await rpc.post('/', {
+    const body = {
       action: 'process',
       block: JSON.stringify({
         type: 'change',
         previous: block.previous,
-        representative: block.representative,
+        representative: representativer,
         work,
         signature,
       }),
-    });
+    };
+
+    console.log(body);
+
+    const res = await rpc.post('/', body);
 
     if (res.data.error) {
       console.error(res);

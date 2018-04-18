@@ -15,6 +15,7 @@ function sign(params, privateKey) {
 
   const context = blake.blake2bInit(32, null);
   fields.forEach((field) => {
+    console.log(field, params[field]);
     blake.blake2bUpdate(context, (0, _functions.hex_uint8)(params[field]));
   });
 

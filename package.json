@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "assert": "^1.4.1",
+    "async": "^2.6.0",
     "axios": "^0.18.0",
     "big-integer": "^1.6.26",
     "bignumber.js": "^6.0.0",
@@ -20,6 +21,7 @@
     "mobx": "^3.5.1",
     "mobx-react": "^4.4.1",
     "pbkdf2": "^3.0.14",
+    "prettier": "^1.12.1",
     "prop-types": "^15.6.1",
     "qrcode.react": "^0.8.0",
     "raiblocks-pow": "0.0.3",

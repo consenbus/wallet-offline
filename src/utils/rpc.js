@@ -14,7 +14,6 @@ const post = (uri, body) => {
     retry(length, (callback) => {
       const root = baseURLs[baseURLIndex % length];
       const url = `${root}${uri}`;
-      console.log(url);
       axios
         .post(url, body)
         .then((resp) => {
@@ -22,7 +21,6 @@ const post = (uri, body) => {
           callback(null, resp);
         })
         .catch((error) => {
-          console.log('fuck you', baseURLIndex);
           baseURLIndex += 1;
           callback(error);
         });

@@ -11,7 +11,7 @@ import store from '../utils/store';
 import converter from '../utils/converter';
 import sign from '../utils/wallet/sign';
 import nacl from '../utils/wallet/nacl';
-import { dec2hex, uint8_hex, hex_uint8, accountFromHexKey, keyFromAccount } from '../utils/wallet/functions';
+import { dec2hex, uint8_hex, hex_uint8, encrypt, decrypt, accountFromHexKey, keyFromAccount } from '../utils/wallet/functions';
 
 // const representative = 'bus_3h7qonaut7wkedquso3hakhpp79rp4bsysggtko519qm6bfrrua8dqbhge77';
 let representative = 'bus_1zrzcmckjhjcpcepmuua8fyqiq4e4exgt1ruxw4hymgfchiyeaa536w8fyot';
@@ -40,10 +40,21 @@ const newKeyFromSeed = (seed) => {
   };
 };
 
+let password = ''; // Current user password
+const storeName = 'wallet-offline';
+const passwordCharTypes = [
+  /[0-9]/,
+  /[a-z]/,
+  /[A-Z]/,
+  /[^0-9a-zA-Z]/,
+];
+
 class Account {
   constructor() {
     extendObservable(this, {
       loading: false,
+      passwordError: null,
+      passwordExists: false,
       accounts: [],
       currentAccount: {},
       currentHistory: {},
@@ -75,10 +86,15 @@ class Account {
   async saveAccount(name, keys, seed) {
     this.currentAccount = _merge(keys, { name, seed });
     this.accounts.push(this.currentAccount);
-    const storeResult = await store.setItem('wallet-online', this.accounts);
-    this.accounts = storeResult;
+    await this.save2store();
     this.createLoading = false;
-    return storeResult;
+    return this.accounts;
+  }
+
+  async save2store() {
+    const text = JSON.stringify(this.accounts);
+    const encrypted = encrypt(text, password);
+    await store.setItem(storeName, encrypted);
   }
 
   async getRepresentative() {
@@ -194,6 +210,29 @@ class Account {
     return res;
   }
 
+  setPassword(value) {
+    password = value;
+    try {
+      Account.passwordVerify(value);
+    } catch (error) {
+      this.passwordError = error;
+      return;
+    }
+
+    this.passwordExists = true;
+    try {
+      this.loadAccounts();
+    } catch (error) {
+      this.passwordError = error;
+      this.passwordExists = false;
+    }
+  }
+
+  static passwordVerify(value) {
+    if (value.length < 12) throw new Error('Password length at least 12 characters');
+    if (_find(passwordCharTypes, regExp => !regExp.test(value))) throw new Error('Password must contain uppercase, lowercase, numbers, and special characters.');
+  }
+
   static async getAccountBlocks(account) {
     const blocks = rpc.post('/', {
       action: 'account_history',
@@ -294,17 +333,34 @@ class Account {
   }
 
   async loadAccounts() {
+    if (password === '') {
+      this.passwordExists = false;
+      return null;
+    }
+
     if (this.hasAccounts()) {
       this.currentAccount = this.accounts[0];
       return null;
     }
 
     this.loading = true;
-    return store.getItem('wallet-online').then((accounts) => {
-      this.accounts = _filter(accounts, x => !x.error) || [];
-      this.currentAccount = this.accounts[0];
+    const encrypted = await store.getItem(storeName);
+    if (!encrypted) {
       this.loading = false;
-    });
+      return null;
+    }
+    let decrypted;
+    try {
+      decrypted = decrypt(encrypted, password);
+    } catch (error) {
+      throw new Error('Bad password, decryption failed. You can also choose to restore your account again.');
+    }
+    const accounts = JSON.parse(decrypted);
+    this.accounts = _filter(accounts, x => !x.error) || [];
+    this.currentAccount = this.accounts[0];
+    this.loading = false;
+    this.accountInit();
+    return this.accounts;
   }
 
   changeCurrentAccount(account) {
@@ -323,13 +379,13 @@ class Account {
       return a;
     });
 
-    store.setItem('wallet-online', this.accounts);
+    this.save2store();
   }
 
   deleteAccount(account) {
     this.accounts = _filter(this.accounts, a => a.account !== account);
 
-    store.setItem('wallet-online', this.accounts);
+    this.save2store();
   }
 
   getAccountBalance(account) {

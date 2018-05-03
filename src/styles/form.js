@@ -36,7 +36,12 @@ const styles = theme => ({
   },
   textFieldFormLabel: {
     fontSize: 18
-  }
+  },
+  error: {
+    padding: "5px",
+    backgroundColor: "#f6f6f6",
+    color: "#ba000d"
+  },
 });
 
 export default styles;

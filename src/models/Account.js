@@ -210,7 +210,7 @@ class Account {
     return res;
   }
 
-  setPassword(value) {
+  async setPassword(value) {
     password = value;
     try {
       Account.passwordVerify(value);
@@ -221,7 +221,7 @@ class Account {
 
     this.passwordExists = true;
     try {
-      this.loadAccounts();
+      await this.loadAccounts();
     } catch (error) {
       this.passwordError = error;
       this.passwordExists = false;

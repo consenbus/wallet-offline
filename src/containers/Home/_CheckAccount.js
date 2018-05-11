@@ -13,9 +13,6 @@ import Dialog, {
 import styles from '../../styles/form';
 
 class CheckAccount extends Component {
-  componentWillMount() {
-  }
-
   clearTempData = () => {
     const { wallet } = this.props;
     wallet.clearTempData();

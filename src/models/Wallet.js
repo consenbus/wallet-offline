@@ -5,7 +5,7 @@ import ConsenbusWalletCore from 'consenbus-wallet-core';
 
 // let representative = 'bus_1zrzcmckjhjcpcepmuua8fyqiq4e4exgt1ruxw4hymgfchiyeaa536w8fyot';
 
-const storeName = 'wallet-offline';
+const storeName = 'consenbus/wallet-offline';
 
 const reader = () => localStorage[storeName];
 
@@ -38,7 +38,7 @@ const initialize = (password, pin) => {
   try {
     wallet.core = ConsenbusWalletCore(password, pin, reader, writer);
   } catch (e) {
-    wallet.error = e;
+    wallet.error = Error('The password is incorrect or the temporary data is corrupted. Please re-enter the password or click Restore/Generate button.');
   }
 };
 
@@ -84,14 +84,23 @@ const restoreFromEntropy = (entropy) => {
   }
 };
 
+const isExists = () => !!reader();
+
+const clearTempData = () => {
+  wallet.error = null;
+  writer('');
+};
+
 Object.assign(wallet, {
-  generate,
   initialize,
+  generate,
   backupFromMnemonic,
   backupFromEntropy,
   changeCurrent,
   restoreFromMnemonic,
   restoreFromEntropy,
+  isExists,
+  clearTempData,
 });
 
 export default wallet;

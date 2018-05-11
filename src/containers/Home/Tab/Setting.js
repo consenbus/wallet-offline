@@ -39,8 +39,8 @@ class Setting extends Component {
             </List>
             <Divider />
             <List component="nav">
-              <ListItem button>
-                <ListItemText primary="Security Preferences" />
+              <ListItem button onClick={this.openChangePasswordDialog}>
+                <ListItemText primary="Security Preferences" secondary="Change password" />
                 <RightIcon />
               </ListItem>
             </List>

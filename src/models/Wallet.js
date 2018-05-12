@@ -18,6 +18,7 @@ const wallet = {};
 extendObservable(wallet, {
   core: null,
   error: null,
+  name: null,
   mnemonic: null,
   entropy: null,
   accounts: [], // accounts [[address, publicKey], ...]
@@ -35,10 +36,9 @@ const changeCurrent = (index) => {
   }
 };
 
-const initialize = (name, password, salt) => {
+const initialize = (password, salt) => {
   try {
     wallet.core = ConsenbusWalletCore(password, salt, reader, writer);
-    localStorage['consenbus/wallet-name'] = name;
     wallet.error = null;
   } catch (e) {
     wallet.error = Error('The password is incorrect or the temporary data is corrupted. Please re-enter the password or click Restore/Generate button.');
@@ -94,9 +94,17 @@ const restoreFromEntropy = (entropy) => {
 
 const isExists = () => !!reader();
 
+const storeNameKey = 'consenbus/wallet-name';
+const setName = (name) => {
+  localStorage[storeNameKey] = name;
+  wallet.name = name;
+};
+
+const getName = () => localStorage[storeNameKey];
+
 const clearTempData = () => {
   wallet.error = null;
-  localStorage['consenbus/wallet-name'] = '';
+  setName('');
   writer('');
 };
 
@@ -110,6 +118,8 @@ Object.assign(wallet, {
   restoreFromEntropy,
   isExists,
   clearTempData,
+  setName,
+  getName,
 });
 
 export default wallet;

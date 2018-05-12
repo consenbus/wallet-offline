@@ -4,6 +4,7 @@ import { Switch, Route } from 'react-router-dom';
 // guide
 import Index from './Guide/Index';
 import Create from './Guide/Create';
+import Tooltips from './Guide/Tooltips';
 import Backup from './Guide/Backup';
 import BackupWarning from './Guide/BackupWarning';
 import NoScreenshot from './Guide/NoScreenshot';
@@ -21,6 +22,7 @@ class Guide extends Component {
         <Switch>
           {/* guide */}
           <Route path="/guide" exact component={Index} />
+          <Route path="/guide/tooltips" component={Tooltips} />
           <Route path="/guide/restore" component={Restore} />
           <Route path="/guide/create" component={Create} />
           <Route path="/guide/backup" component={Backup} />

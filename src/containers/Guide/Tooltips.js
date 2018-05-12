@@ -10,6 +10,8 @@ import Button from 'material-ui/Button';
 import teal from 'material-ui/colors/teal';
 import red from 'material-ui/colors/red';
 import LeftIcon from 'material-ui-icons/KeyboardArrowLeft';
+import Radio, { RadioGroup } from 'material-ui/Radio';
+import { FormLabel, FormControl, FormControlLabel } from 'material-ui/Form';
 
 import Layout from './_Layout';
 
@@ -52,24 +54,23 @@ class Tooltips extends Component {
   state = {
     success: false,
     disabled: true,
-    option: null,
+    value: null,
     error: null,
-  };
+  }
 
   submit = () => {
-    const { disabled, option } = this.state;
+    const { disabled, value } = this.state;
 
-    const error = option === 'A' ? null : Error('Please confirm the description of the mnemonic.');
+    const error = value === 'A' ? null : Error('Please confirm the description of the mnemonic.');
     const success = !disabled && !error;
     this.setState({ success, error });
-  };
+  }
 
-  select(option) {
-    return () => {
-      const disabled = false;
-
-      this.setState({ disabled, option });
-    };
+  handleChange = (event) => {
+    this.setState({
+      value: event.target.value,
+      disabled: false,
+    });
   }
 
   render() {
@@ -98,26 +99,26 @@ class Tooltips extends Component {
         </div>
         <Card className={classes.card}>
           <CardContent>
-            <Typography className={classes.title} color="textSecondary">
+            <Typography className={classes.title} color="textSecondary" style={{ textAlign: 'left', marginBottom: '1rem' }}>
               Take a closer look at the words above. answer the following questions!
             </Typography>
-            <Typography variant="headline" component="h2" style={{ textAlign: 'left', fontSize: '1.2rem' }}>
-              What do I do if I lost or misremembered my mnemonic?
-            </Typography>
-            <Typography component="div" style={{ textAlign: 'left', marginBottom: '1rem' }}>
-              <div style={{ marginBottom: '1rem' }}>
-                <label htmlFor="option-A">
-                  <input type="radio" id="option-A" name="option" value="A" onClick={this.select('A')} />
-                  Recollect yourself carefully, looking for places that might be recorded.
-                </label>
-              </div>
-              <div>
-                <label htmlFor="option-B">
-                  <input type="radio" id="option-B" name="option" value="B" onClick={this.select('B')} />
-                  Contact Consenbus and they can help find them back.
-                </label>
-              </div>
-            </Typography>
+            <FormControl component="fieldset" required className={classes.formControl}>
+              <Typography component="div" style={{ textAlign: 'left', marginBottom: '1rem' }}>
+                <FormLabel component="legend">
+                  What do I do if I lost or misremembered my mnemonic?
+                </FormLabel>
+                <RadioGroup
+                  aria-label="gender"
+                  name="gender1"
+                  className={classes.group}
+                  value={this.state.value}
+                  onChange={this.handleChange}
+                >
+                  <FormControlLabel value="A" control={<Radio />} label="Try to find where you backup and hide the mnemonic." />
+                  <FormControlLabel value="B" control={<Radio />} label="Contact the customer service to recover the wallet." />
+                </RadioGroup>
+              </Typography>
+            </FormControl>
             {error && (
               <Typography
                 style={{

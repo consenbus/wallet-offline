@@ -29,14 +29,17 @@ extendObservable(wallet, {
 const changeCurrent = (index) => {
   if (index >= 0 && index <= 9) {
     wallet.currentIndex = index;
+    wallet.error = null;
   } else {
     wallet.error = Error('The minimum value of index is 0 and the maximum is 9.');
   }
 };
 
-const initialize = (password, pin) => {
+const initialize = (name, password, salt) => {
   try {
-    wallet.core = ConsenbusWalletCore(password, pin, reader, writer);
+    wallet.core = ConsenbusWalletCore(password, salt, reader, writer);
+    localStorage['consenbus/wallet-name'] = name;
+    wallet.error = null;
   } catch (e) {
     wallet.error = Error('The password is incorrect or the temporary data is corrupted. Please re-enter the password or click Restore/Generate button.');
   }
@@ -47,6 +50,7 @@ const generate = () => {
     wallet.core.generate();
     wallet.accounts = _times(10, i => [wallet.core.getAddress(i), wallet.core.getPublicKey(i)]);
     changeCurrent(0);
+    wallet.error = null;
   } catch (e) {
     wallet.error = e;
   }
@@ -55,6 +59,7 @@ const generate = () => {
 const backupFromMnemonic = (password, language) => {
   try {
     wallet.mnemonic = wallet.core.backupFromMnemonic(password, language);
+    wallet.error = null;
   } catch (e) {
     wallet.error = e;
   }
@@ -63,6 +68,7 @@ const backupFromMnemonic = (password, language) => {
 const backupFromEntropy = (password) => {
   try {
     wallet.entropy = wallet.core.backupFromEntropy(password);
+    wallet.error = null;
   } catch (e) {
     wallet.error = e;
   }
@@ -71,6 +77,7 @@ const backupFromEntropy = (password) => {
 const restoreFromMnemonic = (mnemonic, language) => {
   try {
     wallet.core.restoreFromMnemonic(mnemonic, language);
+    wallet.error = null;
   } catch (e) {
     wallet.error = e;
   }
@@ -79,6 +86,7 @@ const restoreFromMnemonic = (mnemonic, language) => {
 const restoreFromEntropy = (entropy) => {
   try {
     wallet.core.restoreFromEntropy(entropy);
+    wallet.error = null;
   } catch (e) {
     wallet.error = e;
   }
@@ -88,6 +96,7 @@ const isExists = () => !!reader();
 
 const clearTempData = () => {
   wallet.error = null;
+  localStorage['consenbus/wallet-name'] = '';
   writer('');
 };
 

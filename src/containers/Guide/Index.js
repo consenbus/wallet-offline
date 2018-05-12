@@ -39,13 +39,13 @@ class Index extends Component {
             size="large"
             fullWidth
             component={Link}
-            to="/guide/create"
+            to="/guide/tooltips"
             style={{
               color: 'white',
               backgroundColor: teal.A700,
             }}
           >
-            Get started
+            Generate new wallet
           </Button>
         </div>
 

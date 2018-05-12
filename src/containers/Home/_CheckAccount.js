@@ -30,7 +30,13 @@ class CheckAccount extends Component {
         if (core && core.exists()) {
           return <ComponentSub {...props} />;
         }
-        return <Password submit={this.signin} error={error} />;
+        return (
+          <Password
+            submit={this.signin}
+            clearTempData={this.clearTempData}
+            error={error}
+          />
+        );
       }
 
       return (

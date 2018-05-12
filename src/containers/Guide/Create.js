@@ -79,10 +79,11 @@ class Create extends Component {
       return;
     }
 
-    wallet.initialize(name, password);
+    wallet.initialize(password);
     if (wallet.error) {
       this.setState({ passwordError: wallet.error.message });
     } else {
+      wallet.setName(name);
       wallet.generate();
       this.setState({ success: true });
     }

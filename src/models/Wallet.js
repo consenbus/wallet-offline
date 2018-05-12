@@ -19,8 +19,6 @@ extendObservable(wallet, {
   core: null,
   error: null,
   name: null,
-  mnemonic: null,
-  entropy: null,
   accounts: [], // accounts [[address, publicKey], ...]
   currentIndex: 0, // current Index max value is 10
   currentBalance: 0, // balance of current selected account
@@ -36,20 +34,25 @@ const changeCurrent = (index) => {
   }
 };
 
+const makeAccounts = () => {
+  wallet.accounts = _times(10, i => [wallet.core.getAddress(i), wallet.core.getPublicKey(i)]);
+  changeCurrent(0);
+};
+
 const initialize = (password, salt) => {
   try {
     wallet.core = ConsenbusWalletCore(password, salt, reader, writer);
     wallet.error = null;
   } catch (e) {
-    wallet.error = Error('The password is incorrect or the temporary data is corrupted. Please re-enter the password or click Restore/Generate button.');
+    console.log(e);
+    wallet.error = e;
   }
 };
 
 const generate = () => {
   try {
     wallet.core.generate();
-    wallet.accounts = _times(10, i => [wallet.core.getAddress(i), wallet.core.getPublicKey(i)]);
-    changeCurrent(0);
+    makeAccounts();
     wallet.error = null;
   } catch (e) {
     wallet.error = e;
@@ -58,25 +61,30 @@ const generate = () => {
 
 const backupFromMnemonic = (password, language) => {
   try {
-    wallet.mnemonic = wallet.core.backupFromMnemonic(password, language);
+    const mnemonic = wallet.core.backupFromMnemonic(password, language);
     wallet.error = null;
+    return mnemonic;
   } catch (e) {
     wallet.error = e;
   }
+  return false;
 };
 
 const backupFromEntropy = (password) => {
   try {
-    wallet.entropy = wallet.core.backupFromEntropy(password);
+    const entropy = wallet.core.backupFromEntropy(password);
     wallet.error = null;
+    return entropy;
   } catch (e) {
     wallet.error = e;
   }
+  return false;
 };
 
 const restoreFromMnemonic = (mnemonic, language) => {
   try {
     wallet.core.restoreFromMnemonic(mnemonic, language);
+    makeAccounts();
     wallet.error = null;
   } catch (e) {
     wallet.error = e;
@@ -86,6 +94,7 @@ const restoreFromMnemonic = (mnemonic, language) => {
 const restoreFromEntropy = (entropy) => {
   try {
     wallet.core.restoreFromEntropy(entropy);
+    makeAccounts();
     wallet.error = null;
   } catch (e) {
     wallet.error = e;
@@ -108,6 +117,8 @@ const clearTempData = () => {
   writer('');
 };
 
+const languages = () => ConsenbusWalletCore.languages;
+
 Object.assign(wallet, {
   initialize,
   generate,
@@ -120,6 +131,7 @@ Object.assign(wallet, {
   clearTempData,
   setName,
   getName,
+  languages,
 });
 
 export default wallet;

@@ -24,8 +24,11 @@ const styles = {
 
 class Index extends Component {
   render() {
-    const { account, classes } = this.props;
-    const accounts = account.accounts;
+    const { wallet, classes } = this.props;
+
+    const {
+      name, accounts, currentIndex, currentBalance, currentHistory,
+    } = wallet;
 
     const action = (
       <IconButton component={Link} to="/account/new">
@@ -44,8 +47,8 @@ class Index extends Component {
           <Card>
             <CardHeader
               action={action}
-              title="My account"
-              subheader={`Total ${accounts.length || 0} account`}
+              title={name}
+              subheader={accounts[currentIndex][0]}
             />
             <Divider />
 
@@ -74,4 +77,4 @@ class Index extends Component {
   }
 }
 
-export default withStyles(styles)(inject('account')(observer(Index)));
+export default withStyles(styles)(inject('wallet')(observer(Index)));

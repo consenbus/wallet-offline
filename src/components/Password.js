@@ -18,7 +18,7 @@ class Password extends Component {
   }
 
   render() {
-    const { classes, error } = this.props;
+    const { classes, error, clearTempData } = this.props;
 
     return (
       <Dialog open fullScreen aria-labelledby="form-dialog-title">
@@ -44,7 +44,7 @@ class Password extends Component {
         </DialogContent>
         <DialogActions>
           {error && (
-            <Button onClick={this.clearTempData} color="primary">
+            <Button onClick={clearTempData} color="primary">
               Restore/Generate
             </Button>
           )}

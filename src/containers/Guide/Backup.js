@@ -1,48 +1,47 @@
-import React, { Component } from "react";
-import { Link } from "react-router-dom";
-import ErrorIcon from "material-ui-icons/Error";
-import Button from "material-ui/Button";
-import teal from "material-ui/colors/teal";
-import ArrowDownwardIcon from "material-ui-icons/ArrowDownward";
+import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
+import ErrorIcon from 'material-ui-icons/Error';
+import Button from 'material-ui/Button';
+import teal from 'material-ui/colors/teal';
+import ArrowDownwardIcon from 'material-ui-icons/ArrowDownward';
 
-import Layout from "./_Layout";
+import Layout from './_Layout';
 
 class Backup extends Component {
   render() {
     return (
       <Layout>
-        <div style={{ marginTop: "30%" }}>
+        <div style={{ marginTop: '30%' }}>
           <ErrorIcon
             style={{
-              color: teal["A700"],
+              color: teal.A700,
               width: 100,
-              height: 100
+              height: 100,
             }}
           />
         </div>
 
         <h2>No backup, no consenbus</h2>
-        <p style={{ marginTop: "1rem" }}>
+        <p style={{ marginTop: '1rem' }}>
           Since only you control your money, you’ll need to save your backup
           phrase in case this app is deleted.
         </p>
 
-        <div style={{ marginTop: "40%" }}>
+        <div style={{ marginTop: '40%' }}>
           <ArrowDownwardIcon
             style={{
-              color: teal["A700"],
+              color: teal.A700,
               width: 50,
-              height: 50
+              height: 50,
             }}
           />
         </div>
 
-        <p style={{ marginTop: "1rem" }}>
-          Your wallet is never saved to cloud storage or standard device
-          backups.
+        <p style={{ marginTop: '1rem' }}>
+          WARNING: Write the mnemonic DOWN. If the mnemonic is lost, it will be IMPOSSIBLE to restore your ASSETS.
         </p>
 
-        <div style={{ marginTop: "1rem" }}>
+        <div style={{ marginTop: '1rem' }}>
           <Button
             variant="raised"
             color="secondary"
@@ -51,16 +50,16 @@ class Backup extends Component {
             component={Link}
             to="/guide/backup-warning"
             style={{
-              color: "white",
-              backgroundColor: teal["A700"]
+              color: 'white',
+              backgroundColor: teal.A700,
             }}
           >
             Backup wallet
           </Button>
         </div>
 
-        <div style={{ marginTop: "1rem" }}>
-          <Link to="/" style={{ color: "white" }}>
+        <div style={{ marginTop: '1rem' }}>
+          <Link to="/" style={{ color: 'white' }}>
             Do it later
           </Link>
         </div>

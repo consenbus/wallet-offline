@@ -35,6 +35,10 @@ class Index extends Component {
     this.setState({ anchorEl: null });
   }
 
+  handleClose = () => {
+    this.setState({ anchorEl: null });
+  }
+
   render() {
     const { wallet, classes } = this.props;
     const { anchorEl } = this.state;

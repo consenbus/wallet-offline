@@ -10,10 +10,22 @@ import Tabs, { Tab } from 'material-ui/Tabs';
 import Paper from 'material-ui/Paper';
 import Typography from 'material-ui/Typography';
 import Chip from 'material-ui/Chip';
+import Menu, { MenuItem } from 'material-ui/Menu';
 
 import Layout from './_Layout';
 import Password from '../../components/Password';
 import styles from '../../styles/form';
+
+const langs = {
+  zh: '简体中文',
+  cht: '繁体中文',
+  en: 'English',
+  jp: '日本語',
+  kor: '한국어',
+  fra: 'Français',
+  spa: 'El español',
+  it: 'In Italiano',
+};
 
 class WriteDown extends Component {
   state = {
@@ -21,8 +33,10 @@ class WriteDown extends Component {
     language: 'en',
     content: null,
     password: null,
+    anchorEl: null,
   }
-getBackupContent(password, type, language) {
+
+  getBackupContent(password, type, language) {
     const { wallet } = this.props;
     let content;
     if (type === 'mnemonic') {
@@ -30,6 +44,7 @@ getBackupContent(password, type, language) {
     } else {
       content = wallet.backupFromEntropy(password);
     }
+    debugger
     this.setState({ content });
   }
 
@@ -38,9 +53,17 @@ getBackupContent(password, type, language) {
     this.getBackupContent(this.state.password, type, this.state.language);
   }
 
+  handleClose = () => {
+    this.setState({ anchorEl: null });
+  }
+
   changeLanguage = (event, language) => {
-    this.setState({ language });
+    this.setState({ language, anchorEl: null });
     this.getBackupContent(this.state.password, this.state.type, language);
+  }
+
+  handleClickListItem = (event) => {
+    this.setState({ anchorEl: event.currentTarget });
   }
 
   clearTempData = () => {
@@ -54,12 +77,14 @@ getBackupContent(password, type, language) {
     if (!wallet.core || !wallet.core.exists()) {
       wallet.initialize(password);
     }
-    this.getBackupContent(password, this.state.type, this.state.language);
+    if (!wallet.error) {
+      this.getBackupContent(password, this.state.type, this.state.language);
+    }
   }
 
   render() {
     const {
-      password, type, language, content,
+      password, type, language, content, anchorEl,
     } = this.state;
     const { wallet, classes } = this.props;
 
@@ -120,11 +145,28 @@ getBackupContent(password, type, language) {
               <p style={{ marginTop: '1rem' }}>
                 Please carefully write down this 24 words.
               </p>
+              <Button onClick={this.handleClickListItem}>{langs[language]} Switch</Button>
+              <Menu
+                id="switch-account"
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={this.handleClose}
+              >
+                {wallet.languages().map(x => (
+                  <MenuItem
+                    key={x}
+                    selected={x === language}
+                    onClick={event => this.changeLanguage(event, x)}
+                  >
+                    {langs[x]}
+                  </MenuItem>
+                ))}
+              </Menu>
               <div style={{
                 fontSize: '1.5rem', padding: '1rem', lineHeight: '2rem', textAlign: 'left',
               }}
               >
-                {content.split(' ').map(x => (
+                {content.split(' ').map((x, i) => (
                   <Chip
                     key={x}
                     label={x}

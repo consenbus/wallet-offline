@@ -55,15 +55,22 @@ class Password extends Component {
             style={{
               color: 'white',
               backgroundColor: teal.A700,
+              marginBottom: '1rem',
             }}
             onClick={this.submit}
           >
             Submit verify password
           </Button>
           {error && (
-            <div style={{ marginTop: '1rem', color: 'white' }} onClick={this.cancel}>
+            <Button
+              variant="raised"
+              color="secondary"
+              size="large"
+              fullWidth
+              onClick={this.cancel}
+            >
               Restore / Create new wallet
-            </div>
+            </Button>
           )}
 
         </DialogContent>

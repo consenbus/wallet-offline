@@ -10,6 +10,7 @@ const storeName = 'consenbus/wallet-offline';
 const reader = () => localStorage[storeName];
 
 const writer = (encrypted) => {
+  debugger
   localStorage[storeName] = encrypted;
 };
 
@@ -43,12 +44,13 @@ const makeAccounts = () => {
 const initialize = (password, salt) => {
   try {
     wallet.core = ConsenbusWalletCore(password, salt, reader, writer);
-    makeAccounts();
-    wallet.error = null;
-  } catch (e) {
-    console.log(e);
-    wallet.error = e;
+  } catch (error) {
+    debugger
+    wallet.error = error;
+    return;
   }
+  wallet.error = null;
+  makeAccounts();
 };
 
 const generate = () => {

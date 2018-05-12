@@ -35,6 +35,7 @@ const changeCurrent = (index) => {
 };
 
 const makeAccounts = () => {
+  if (!wallet.core || !wallet.core.exists()) return;
   wallet.accounts = _times(10, i => [wallet.core.getAddress(i), wallet.core.getPublicKey(i)]);
   changeCurrent(0);
 };
@@ -42,6 +43,7 @@ const makeAccounts = () => {
 const initialize = (password, salt) => {
   try {
     wallet.core = ConsenbusWalletCore(password, salt, reader, writer);
+    makeAccounts();
     wallet.error = null;
   } catch (e) {
     console.log(e);

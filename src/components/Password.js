@@ -3,8 +3,8 @@ import { observer, inject } from 'mobx-react';
 import { withStyles } from 'material-ui/styles';
 import Button from 'material-ui/Button';
 import TextField from 'material-ui/TextField';
+import teal from 'material-ui/colors/teal';
 import Dialog, {
-  DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
@@ -17,8 +17,13 @@ class Password extends Component {
     this.props.submit(pass.value.trim());
   }
 
+  cancel = () => {
+    const { clearTempData } = this.props;
+    if (clearTempData) clearTempData();
+  }
+
   render() {
-    const { classes, error, clearTempData } = this.props;
+    const { classes, error } = this.props;
 
     return (
       <Dialog open fullScreen aria-labelledby="form-dialog-title">
@@ -41,17 +46,27 @@ class Password extends Component {
             type="password"
             fullWidth
           />
-        </DialogContent>
-        <DialogActions>
-          {error && (
-            <Button onClick={clearTempData} color="primary">
-              Restore/Generate
-            </Button>
-          )}
-          <Button onClick={this.submit} color="primary" autoFocus>
-            Submit
+
+          <Button
+            variant="raised"
+            color="secondary"
+            size="large"
+            fullWidth
+            style={{
+              color: 'white',
+              backgroundColor: teal.A700,
+            }}
+            onClick={this.submit}
+          >
+            Submit verify password
           </Button>
-        </DialogActions>
+          {error && (
+            <div style={{ marginTop: '1rem', color: 'white' }} onClick={this.cancel}>
+              Restore / Create new wallet
+            </div>
+          )}
+
+        </DialogContent>
       </Dialog>
     );
   }

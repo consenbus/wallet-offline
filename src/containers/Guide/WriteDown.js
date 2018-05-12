@@ -22,8 +22,7 @@ class WriteDown extends Component {
     content: null,
     password: null,
   }
-
-  getBackupContent(password, type, language) {
+getBackupContent(password, type, language) {
     const { wallet } = this.props;
     let content;
     if (type === 'mnemonic') {

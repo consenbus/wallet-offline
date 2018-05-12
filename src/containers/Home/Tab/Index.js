@@ -5,12 +5,10 @@ import { withStyles } from 'material-ui/styles';
 
 import List, { ListItem, ListItemText } from 'material-ui/List';
 import Card, { CardHeader } from 'material-ui/Card';
-import IconButton from 'material-ui/IconButton';
 import Paper from 'material-ui/Paper';
 import Divider from 'material-ui/Divider';
-import Avatar from 'material-ui/Avatar';
-import AddIcon from 'material-ui-icons/Add';
-import WalletIcon from 'material-ui-icons/AccountBalanceWallet';
+import Red from 'material-ui/colors/red';
+import Menu, { MenuItem } from 'material-ui/Menu';
 import _map from 'lodash/map';
 
 import Layout from '../_Layout';
@@ -23,17 +21,38 @@ const styles = {
 };
 
 class Index extends Component {
+  state = {
+    anchorEl: null,
+  }
+
+  handleClickListItem = (event) => {
+    this.setState({ anchorEl: event.currentTarget });
+  }
+
+  handleMenuItemClick = (event, index) => {
+    const { wallet } = this.props;
+    wallet.changeCurrent(index);
+    this.setState({ anchorEl: null });
+  }
+
   render() {
     const { wallet, classes } = this.props;
+    const { anchorEl } = this.state;
 
     const {
-      name, accounts, currentIndex, currentBalance, currentHistory,
+      accounts, currentIndex, currentBalance, currentHistory,
     } = wallet;
 
     const action = (
-      <IconButton component={Link} to="/account/new">
-        <AddIcon />
-      </IconButton>
+      <div
+        style={{
+          margin: '1rem',
+          fontSize: '2rem',
+          color: Red.A400,
+        }}
+      >
+        {currentBalance}
+      </div>
     );
 
     return (
@@ -47,29 +66,30 @@ class Index extends Component {
           <Card>
             <CardHeader
               action={action}
-              title={name}
-              subheader={accounts[currentIndex][0]}
+              title={wallet.getName()}
             />
+            <div className="ellipsis" style={{ margin: '1rem' }}>
+              <span onClick={this.handleClickListItem}>Switch</span>Address_{currentIndex + 1}: {accounts[currentIndex][0]}
+            </div>
+            <Menu
+              id="switch-account"
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={this.handleClose}
+            >
+              {_map(accounts, ([address], index) => (
+                <MenuItem
+                  key={address}
+                  selected={index === currentIndex}
+                  onClick={event => this.handleMenuItemClick(event, index)}
+                >
+                  Address_{index + 1} {address}
+                </MenuItem>
+              ))}
+            </Menu>
             <Divider />
 
-            <List>
-              {_map(accounts, a => (
-                <ListItem
-                  key={a.account}
-                  component={Link}
-                  to={`/accounts/${a.account || 'null'}`}
-                >
-                  <Avatar>
-                    <WalletIcon />
-                  </Avatar>
-                  <ListItemText
-                    style={{ textOverflow: 'ellipsis', overflow: 'hidden' }}
-                    primary={a.name || 'Default account'}
-                    secondary={a.account}
-                  />
-                </ListItem>
-              ))}
-            </List>
+            <div>currentHistory blocks</div>
           </Card>
         </div>
       </Layout>

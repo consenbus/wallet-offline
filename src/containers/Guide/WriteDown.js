@@ -44,7 +44,6 @@ class WriteDown extends Component {
     } else {
       content = wallet.backupFromEntropy(password);
     }
-    debugger
     this.setState({ content });
   }
 
@@ -97,6 +96,7 @@ class WriteDown extends Component {
         />
       );
     }
+    let c = 0;
 
     return (
       <Layout>
@@ -166,14 +166,15 @@ class WriteDown extends Component {
                 fontSize: '1.5rem', padding: '1rem', lineHeight: '2rem', textAlign: 'left',
               }}
               >
-                {content.split(' ').map((x, i) => (
-                  <Chip
-                    key={x}
+                {content.split(' ').map((x) => {
+                  c += 1;
+                  return (<Chip
+                    key={c}
                     label={x}
                     className={classes.chip}
                     style={{ marginRight: '0.3rem' }}
-                  />
-                ))}
+                  />);
+                })}
               </div>
             </Typography>
           )}

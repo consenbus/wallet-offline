@@ -54,8 +54,8 @@ class Create extends Component {
     nameError: '',
     password: '',
     passwordError: '',
-    salt: '',
-    saltError: '',
+    confirmPassword: '',
+    confirmPasswordError: '',
   };
 
   handleChange = name => (event) => {
@@ -68,13 +68,18 @@ class Create extends Component {
   handleCreateAccount = (e) => {
     e.preventDefault();
     const { wallet } = this.props;
-    const { name, password, salt } = this.state;
-    if (this.state.name === '') {
+    const { name, password, confirmPassword } = this.state;
+    if (name === '') {
       this.setState({ nameError: 'Name must not be blank.' });
       return;
     }
 
-    wallet.initialize(name, password, salt);
+    if (password !== confirmPassword) {
+      this.setState({ confirmPasswordError: 'Confirm password must be same the password.' });
+      return;
+    }
+
+    wallet.initialize(name, password);
     if (wallet.error) {
       this.setState({ passwordError: wallet.error.message });
     } else {
@@ -85,8 +90,9 @@ class Create extends Component {
 
   render() {
     const { classes } = this.props;
+    const { success } = this.state;
 
-    if (this.state.success) {
+    if (success) {
       return <Redirect to="/guide/backup" />;
     }
 
@@ -119,7 +125,6 @@ class Create extends Component {
           onSubmit={this.handleCreateAccount}
         >
           <TextField
-            id="full-width"
             label="Account name"
             InputProps={inputProps}
             InputLabelProps={inputLabelProps}
@@ -132,12 +137,11 @@ class Create extends Component {
             onChange={this.handleChange('name')}
           />
           <TextField
-            id="full-width"
             label="Password"
             type="password"
             InputProps={inputProps}
             InputLabelProps={inputLabelProps}
-            placeholder="Input you password"
+            placeholder="Your password"
             helperText={this.state.passwordError}
             fullWidth
             value={this.state.password}
@@ -146,17 +150,17 @@ class Create extends Component {
             onChange={this.handleChange('password')}
           />
           <TextField
-            id="full-width"
-            label="Salt"
+            label="Confirm Password"
+            type="password"
             InputProps={inputProps}
             InputLabelProps={inputLabelProps}
-            placeholder="Input you salt"
-            helperText={this.state.saltError}
+            placeholder="Confirm password"
+            helperText={this.state.confirmPasswordError}
             fullWidth
-            value={this.state.salt}
+            value={this.state.confirmPassword}
             margin="normal"
-            error={!_isEmpty(this.state.saltError)}
-            onChange={this.handleChange('salt')}
+            error={!_isEmpty(this.state.confirmPasswordError)}
+            onChange={this.handleChange('confirmPassword')}
           />
         </form>
 

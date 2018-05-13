@@ -120,6 +120,7 @@ class Restore extends Component {
     if (wallet.error) {
       this.setState({ valueError: wallet.error.message });
     } else {
+      wallet.setName(name);
       this.setState({ success: true });
     }
   };

@@ -35,7 +35,7 @@ class HistoryList extends Component {
     return (
       <List>
         {_map(list, h => (
-          <ListItem component={Link} to={`/explorer/blocks/${h.hash}`}>
+          <ListItem key={h.hash} component={Link} to={`/explorer/blocks/${h.hash}`}>
             {h.type === 'receive' ? (
               <Avatar className={classes.greenAvatar}>
                 <AddCircleOutlineIcon />

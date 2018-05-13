@@ -31,6 +31,8 @@ class Send extends Component {
     amount: '',
     amountError: '',
     unit: 'BUS',
+    password: '',
+    passwordError: '',
     loading: false,
     success: false,
   };
@@ -43,7 +45,7 @@ class Send extends Component {
   };
 
   handleChangeSender = (ev) => {
-    this.props.account.changeCurrentAccount(ev.target.value);
+    this.props.wallet.changeCurrent(ev.target.value);
   };
 
   handleSend = async (e) => {
@@ -59,12 +61,18 @@ class Send extends Component {
     }
 
     const {
-      amount, unit, account: toAccountAddress,
+      amount, unit, password, account: toAccountAddress,
     } = this.state;
+    const { wallet } = this.props;
 
     this.setState({ loading: true });
-    await this.props.account
-      .send(amount, unit, toAccountAddress);
+    try {
+      await wallet.send(amount, unit, toAccountAddress, password);
+    } catch (error) {
+      this.setState({ passwordError: error.message, loading: false });
+      return;
+    }
+
     this.setState({
       success: true,
       loading: false,
@@ -72,8 +80,7 @@ class Send extends Component {
   };
 
   render() {
-    const { classes, account: { accounts } } = this.props;
-    const account = this.props.account.currentAccount;
+    const { classes, wallet: { accounts, currentIndex } } = this.props;
     const inputProps = {
       disableUnderline: true,
       classes: {
@@ -108,7 +115,7 @@ class Send extends Component {
                   id="select-account"
                   select
                   label="Sender"
-                  value={account.account}
+                  value={currentIndex}
                   onChange={this.handleChangeSender}
                   helperText="Choice sender"
                   margin="normal"
@@ -118,9 +125,9 @@ class Send extends Component {
                   }}
                   InputLabelProps={inputLabelProps}
                 >
-                  {_map(accounts, x => (
-                    <MenuItem key={x.account} value={x.account}>
-                      {x.name || x.account}
+                  {_map(accounts, (x, i) => (
+                    <MenuItem key={x[0]} value={i}>
+                      Address_{i + 1} {x[0]}
                     </MenuItem>
                   ))}
                 </TextField>
@@ -173,6 +180,21 @@ class Send extends Component {
                     </MenuItem>
                   ))}
                 </TextField>
+
+                <TextField
+                  id="wallet-password"
+                  label="Recipient"
+                  InputProps={inputProps}
+                  InputLabelProps={inputLabelProps}
+                  placeholder="Wallet password"
+                  margin="normal"
+                  type="password"
+                  fullWidth
+                  helperText={this.state.passwordError}
+                  error={!_isEmpty(this.state.passwordError)}
+                  value={this.state.password}
+                  onChange={this.handleChangeForm('password')}
+                />
               </form>
             </CardContent>
             <CardActions>
@@ -200,4 +222,4 @@ class Send extends Component {
   }
 }
 
-export default withStyles(styles)(inject('account')(observer(Send)));
+export default withStyles(styles)(inject('wallet')(observer(Send)));

@@ -5,8 +5,12 @@ import ConsenbusWalletCore from 'consenbus-wallet-core';
 import rpc from '../utils/rpc';
 import store from '../utils/store';
 import pow from '../utils/wallet/pow';
-// import converter from '../utils/converter';
-const { wallet: { publicKeyFromAddress } } = ConsenbusWalletCore;
+import converter from '../utils/converter';
+
+const {
+  wallet: { publicKeyFromAddress },
+  fns: { dec2hex },
+} = ConsenbusWalletCore;
 
 const representative = 'bus_1zrzcmckjhjcpcepmuua8fyqiq4e4exgt1ruxw4hymgfchiyeaa536w8fyot';
 
@@ -31,6 +35,58 @@ extendObservable(wallet, {
   currentHistory: [], // trade log of current selected account
 });
 
+const send = async (amount, unit, toAccountAddress, password) => {
+  const { core, currentIndex, accounts } = wallet;
+  const [address] = accounts[currentIndex];
+
+  // Step 1. Convert amount to raw 128-bit stringified integer. Since converion
+  const rawAmount = converter.unit(amount, unit, 'raw');
+
+  // Step 2. Retrieve your account info to get your latest block hash (frontier)
+  // and balance
+  const info = await rpc.post('/', {
+    action: 'account_info',
+    account: address,
+    count: 1,
+  });
+
+  // Step 3. Generate Proof of Work from your account's frontier
+  const work = await pow(info.data.frontier);
+
+  // Step 4. Generate a send block
+  const block = {
+    type: 'send',
+    previous: info.data.frontier,
+    destination: publicKeyFromAddress(toAccountAddress),
+    balance: dec2hex(converter.minus(info.data.balance, rawAmount), 16).toUpperCase(),
+    work,
+  };
+
+  const signature = core.signature(password, currentIndex, block);
+  // Step 5. Publish your send block to the network using "process"
+  const res = await rpc.post('/', {
+    action: 'process',
+    block: JSON.stringify({
+      type: 'send',
+      previous: block.previous,
+      destination: toAccountAddress,
+      balance: block.balance,
+      work,
+      signature,
+    }),
+  });
+
+  if (res.data.error) {
+    console.error(res);
+    throw new Error(res.data.error);
+  }
+
+  // push the newist hash to pow calc pool
+  pow(res.data.hash);
+
+  return res;
+};
+
 const receive = async () => {
   const { core, pendings } = wallet;
   if (!core || !core.exists()) return;
@@ -51,7 +107,6 @@ const receive = async () => {
 
   const previous = info.data.frontier || publicKey;
 
-  console.log(info);
   // Step 2. Generate Proof of Work from your account's frontier
   const work = await pow(previous);
 
@@ -278,6 +333,7 @@ Object.assign(wallet, {
   setName,
   getName,
   languages,
+  send,
 });
 
 export default wallet;

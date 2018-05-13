@@ -1,4 +1,4 @@
-import blake from 'blakejs';
+mport blake from 'blakejs';
 import { extendObservable } from 'mobx';
 import _isEmpty from 'lodash/isEmpty';
 import _merge from 'lodash/merge';

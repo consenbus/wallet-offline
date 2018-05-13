@@ -3,10 +3,19 @@ import retry from 'async/retry';
 
 let enabledBaseURLIndex = 0;
 const baseURLs = [
-  'http://localhost:55000',
-  'http://140.143.247.112:55000',
+  'http://test.consenbus.org:55000',
 ];
 
+/* production
+const baseURLs = [
+  'http://node.consenbus.org:7576',
+  'http://node-cn-1.consenbus.org:7576',
+  'http://node-cn-2.consenbus.org:7576',
+  'http://node-cn-3.consenbus.org:7576',
+  'http://node-sg-1.consenbus.org:7576',
+  'http://node-us-1.consenbus.org:7576',
+];
+*/
 const post = (uri, body) => {
   const { length } = baseURLs;
   let baseURLIndex = enabledBaseURLIndex;

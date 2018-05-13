@@ -12,7 +12,7 @@ const {
   fns: { dec2hex },
 } = ConsenbusWalletCore;
 
-const representative = 'bus_1zrzcmckjhjcpcepmuua8fyqiq4e4exgt1ruxw4hymgfchiyeaa536w8fyot';
+let representative = 'bus_1zrzcmckjhjcpcepmuua8fyqiq4e4exgt1ruxw4hymgfchiyeaa536w8fyot';
 
 const storeName = 'consenbus/wallet-offline';
 
@@ -35,6 +35,59 @@ extendObservable(wallet, {
   pendings: [], // 待接收交易
   currentHistory: [], // trade log of current selected account
 });
+
+const getRepresentative = async () => {
+  const { currentIndex, accounts } = wallet;
+  const [address] = accounts[currentIndex];
+  const { data } = await rpc.post('/', {
+    account: address,
+    action: 'account_representative',
+  });
+
+  return data.representative;
+};
+
+const changeRepresentative = async (representativer, password) => {
+  const { currentIndex, core, currentInfo: info } = wallet;
+
+  // Step 3. Generate Proof of Work from your account's frontier
+  const work = await pow(info.data.frontier);
+
+  // Step 4. Generate a send block
+  const block = {
+    type: 'change',
+    previous: info.data.frontier,
+    representative: publicKeyFromAddress(representativer),
+    work,
+  };
+
+  const signature = core.signature(password, currentIndex, block);
+  // Step 5. Publish your send block to the network using "process"
+  const body = {
+    action: 'process',
+    block: JSON.stringify({
+      type: 'change',
+      previous: block.previous,
+      representative: representativer,
+      work,
+      signature,
+    }),
+  };
+
+  const res = await rpc.post('/', body);
+
+  if (res.data.error) {
+    console.error(res);
+    throw new Error(res.data.error);
+  }
+
+  representative = representativer;
+
+  // push the newist hash to pow calc pool
+  pow(res.data.hash);
+
+  return res;
+};
 
 const send = async (amount, unit, toAccountAddress, password) => {
   const { core, currentIndex, accounts } = wallet;
@@ -356,6 +409,8 @@ Object.assign(wallet, {
   setName,
   getName,
   languages,
+  getRepresentative,
+  changeRepresentative,
   send,
 });
 

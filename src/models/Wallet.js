@@ -1,26 +1,27 @@
-import { extendObservable } from 'mobx';
-import _times from 'lodash/times';
-import _each from 'lodash/each';
-import rpc from '../utils/rpc';
-import store from '../utils/store';
-import pow from '../utils/wallet/pow';
-import converter from '../utils/converter';
+import { extendObservable } from "mobx";
+import _times from "lodash/times";
+import _each from "lodash/each";
+import rpc from "../utils/rpc";
+import store from "../utils/store";
+import pow from "../utils/wallet/pow";
+import converter from "../utils/converter";
 // import ConsenbusWalletCore from '../utils/core';
 
 const { ConsenbusWalletCore } = window;
 
 const {
   wallet: { publicKeyFromAddress },
-  fns: { dec2hex },
+  fns: { dec2hex }
 } = ConsenbusWalletCore;
 
-let representative = 'bus_1zrzcmckjhjcpcepmuua8fyqiq4e4exgt1ruxw4hymgfchiyeaa536w8fyot';
+let representative =
+  "bus_1zrzcmckjhjcpcepmuua8fyqiq4e4exgt1ruxw4hymgfchiyeaa536w8fyot";
 
-const storeName = 'consenbus/wallet-offline';
+const storeName = "consenbus/wallet-offline";
 
 const reader = () => localStorage[storeName];
 
-const writer = (encrypted) => {
+const writer = encrypted => {
   localStorage[storeName] = encrypted;
 };
 
@@ -35,15 +36,15 @@ extendObservable(wallet, {
   currentBalance: 0, // balance of current selected account
   currentInfo: {}, // current account info
   pendings: [], // 待接收交易
-  currentHistory: [], // trade log of current selected account
+  currentHistory: [] // trade log of current selected account
 });
 
 const getRepresentative = async () => {
   const { currentIndex, accounts } = wallet;
   const [address] = accounts[currentIndex];
-  const { data } = await rpc.post('/', {
+  const { data } = await rpc.post("/", {
     account: address,
-    action: 'account_representative',
+    action: "account_representative"
   });
 
   return data.representative;
@@ -57,26 +58,26 @@ const changeRepresentative = async (representativer, password) => {
 
   // Step 4. Generate a send block
   const block = {
-    type: 'change',
+    type: "change",
     previous: info.frontier,
     representative: publicKeyFromAddress(representativer),
-    work,
+    work
   };
 
   const signature = core.signature(password, currentIndex, block);
   // Step 5. Publish your send block to the network using "process"
   const body = {
-    action: 'process',
+    action: "process",
     block: JSON.stringify({
-      type: 'change',
+      type: "change",
       previous: block.previous,
       representative: representativer,
       work,
-      signature,
-    }),
+      signature
+    })
   };
 
-  const res = await rpc.post('/', body);
+  const res = await rpc.post("/", body);
 
   if (res.data.error) {
     console.error(res);
@@ -96,14 +97,14 @@ const send = async (amount, unit, toAccountAddress, password) => {
   const [address] = accounts[currentIndex];
 
   // Step 1. Convert amount to raw 128-bit stringified integer. Since converion
-  const rawAmount = converter.unit(amount, unit, 'raw');
+  const rawAmount = converter.unit(amount, unit, "raw");
 
   // Step 2. Retrieve your account info to get your latest block hash (frontier)
   // and balance
-  const info = await rpc.post('/', {
-    action: 'account_info',
+  const info = await rpc.post("/", {
+    action: "account_info",
     account: address,
-    count: 1,
+    count: 1
   });
 
   // Step 3. Generate Proof of Work from your account's frontier
@@ -111,25 +112,28 @@ const send = async (amount, unit, toAccountAddress, password) => {
 
   // Step 4. Generate a send block
   const block = {
-    type: 'send',
+    type: "send",
     previous: info.data.frontier,
     destination: publicKeyFromAddress(toAccountAddress),
-    balance: dec2hex(converter.minus(info.data.balance, rawAmount), 16).toUpperCase(),
-    work,
+    balance: dec2hex(
+      converter.minus(info.data.balance, rawAmount),
+      16
+    ).toUpperCase(),
+    work
   };
 
   const signature = core.signature(password, currentIndex, block);
   // Step 5. Publish your send block to the network using "process"
-  const res = await rpc.post('/', {
-    action: 'process',
+  const res = await rpc.post("/", {
+    action: "process",
     block: JSON.stringify({
-      type: 'send',
+      type: "send",
       previous: block.previous,
       destination: toAccountAddress,
       balance: block.balance,
       work,
-      signature,
-    }),
+      signature
+    })
   });
 
   if (res.data.error) {
@@ -150,15 +154,13 @@ const receive = async () => {
   const pending = pendings.shift();
   if (!pending) return;
 
-  const {
-    index, address, publicKey, hash,
-  } = pending;
+  const { index, address, publicKey, hash } = pending;
 
   // Step 1. Retrieve your account info to get your latest block hash (frontier)
-  const info = await rpc.post('/', {
-    action: 'account_info',
+  const info = await rpc.post("/", {
+    action: "account_info",
     account: address,
-    count: 1,
+    count: 1
   });
 
   const previous = info.data.frontier || publicKey;
@@ -166,18 +168,15 @@ const receive = async () => {
   // Step 2. Generate Proof of Work from your account's frontier
   const work = await pow(previous);
 
-  console.log(work);
-  console.log('publicKeyFromAddress', publicKeyFromAddress, 'sss');
   // Step 3. Generate a open/receive block
   const block = {
-    type: previous === publicKey ? 'open' : 'receive',
+    type: previous === publicKey ? "open" : "receive",
     account: publicKey,
     representative: publicKeyFromAddress(representative),
     source: hash,
-    work,
+    work
   };
-  console.log(publicKeyFromAddress);
-  if (block.type !== 'open') block.previous = previous;
+  if (block.type !== "open") block.previous = previous;
   const signature = core.receiveSign(index, block);
 
   // Step 4. Publish your open block to the network using "process"
@@ -188,11 +187,11 @@ const receive = async () => {
     previous,
     representative,
     work,
-    signature,
+    signature
   };
-  const res = await rpc.post('/', {
-    action: 'process',
-    block: JSON.stringify(newBlock),
+  const res = await rpc.post("/", {
+    action: "process",
+    block: JSON.stringify(newBlock)
   });
 
   // push newist hash to pow calc pool
@@ -202,10 +201,10 @@ const receive = async () => {
 const pullHistoryList = async () => {
   const { accounts, currentIndex: index } = wallet;
   const [address] = accounts[index];
-  const { data } = await rpc.post('/', {
-    action: 'account_history',
+  const { data } = await rpc.post("/", {
+    action: "account_history",
     account: address,
-    count: 500,
+    count: 500
   });
   if (Array.isArray(data.history)) {
     wallet.currentHistory = data.history;
@@ -215,10 +214,12 @@ const pullHistoryList = async () => {
 
 const pullPendings = async () => {
   const { accounts } = wallet;
-  const { data: { blocks } } = await rpc.post('/', {
-    action: 'accounts_pending',
+  const {
+    data: { blocks }
+  } = await rpc.post("/", {
+    action: "accounts_pending",
     accounts: accounts.map(([address]) => address),
-    count: 100,
+    count: 100
   });
   const pendings = [];
   _each(accounts, ([address, publicKey], index) => {
@@ -226,7 +227,10 @@ const pullPendings = async () => {
     if (!Array.isArray(_blks) || _blks.length === 0) return;
     const hash = _blks[0];
     pendings.push({
-      address, publicKey, index, hash,
+      address,
+      publicKey,
+      index,
+      hash
     });
   });
   wallet.pendings = pendings;
@@ -235,9 +239,9 @@ const pullPendings = async () => {
 const pullAccountInfo = async () => {
   const { accounts, currentIndex: index } = wallet;
   const [address] = accounts[index];
-  const { data } = await rpc.post('/', {
-    action: 'account_info',
-    account: address,
+  const { data } = await rpc.post("/", {
+    action: "account_info",
+    account: address
   });
   if (data.error) return;
   wallet.currentInfo = data;
@@ -276,7 +280,7 @@ const runner = async () => {
 };
 runner();
 
-const changeCurrent = (index) => {
+const changeCurrent = index => {
   if (index >= 0 && index <= 9) {
     wallet.currentIndex = index;
     wallet.error = null;
@@ -291,13 +295,18 @@ const changeCurrent = (index) => {
       wallet.currentInfo = info || {};
     });
   } else {
-    wallet.error = Error('The minimum value of index is 0 and the maximum is 9.');
+    wallet.error = Error(
+      "The minimum value of index is 0 and the maximum is 9."
+    );
   }
 };
 
 const makeAccounts = () => {
   if (!wallet.core || !wallet.core.exists()) return;
-  wallet.accounts = _times(10, i => [wallet.core.getAddress(i), wallet.core.getPublicKey(i)]);
+  wallet.accounts = _times(10, i => [
+    wallet.core.getAddress(i),
+    wallet.core.getPublicKey(i)
+  ]);
   changeCurrent(0);
 };
 
@@ -333,7 +342,7 @@ const backupFromMnemonic = (password, language) => {
   return false;
 };
 
-const backupFromEntropy = (password) => {
+const backupFromEntropy = password => {
   try {
     const entropy = wallet.core.backupFromEntropy(password);
     wallet.error = null;
@@ -354,7 +363,7 @@ const restoreFromMnemonic = (mnemonic, language) => {
   }
 };
 
-const restoreFromEntropy = (entropy) => {
+const restoreFromEntropy = entropy => {
   try {
     wallet.core.restoreFromEntropy(entropy);
     makeAccounts();
@@ -366,8 +375,8 @@ const restoreFromEntropy = (entropy) => {
 
 const isExists = () => !!reader();
 
-const storeNameKey = 'consenbus/wallet-name';
-const setName = (name) => {
+const storeNameKey = "consenbus/wallet-name";
+const setName = name => {
   localStorage[storeNameKey] = name;
   wallet.name = name;
 };
@@ -376,15 +385,15 @@ const getName = () => localStorage[storeNameKey];
 
 const clearTempData = () => {
   wallet.error = null;
-  setName('');
-  _times(10, (index) => {
-    store.setItem(`history_${index}`, '');
-    store.setItem(`accountInfo_${index}`, '');
+  setName("");
+  _times(10, index => {
+    store.setItem(`history_${index}`, "");
+    store.setItem(`accountInfo_${index}`, "");
   });
-  writer('');
+  writer("");
 };
 
-const logout = (password) => {
+const logout = password => {
   if (wallet.core) {
     try {
       wallet.core.logout(password);
@@ -413,7 +422,7 @@ Object.assign(wallet, {
   languages,
   getRepresentative,
   changeRepresentative,
-  send,
+  send
 });
 
 export default wallet;

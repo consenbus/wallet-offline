@@ -6,6 +6,9 @@ import List, { ListItem, ListItemText } from 'material-ui/List';
 import Divider from 'material-ui/Divider';
 import Card from 'material-ui/Card';
 import RightIcon from 'material-ui-icons/KeyboardArrowRight';
+import TextField from 'material-ui/TextField';
+import { MenuItem } from 'material-ui/Menu';
+import _map from 'lodash/map';
 import Layout from '../_Layout';
 import Header from './_Header';
 import Password from '../../../components/Password';
@@ -39,9 +42,14 @@ class Setting extends Component {
     if (!wallet.error) this.setState({ logoutSuccess: true });
   }
 
+  handleChangeCurrent = (ev) => {
+    this.props.wallet.changeCurrent(ev.target.value);
+  }
+
   render() {
     const { requestLogout, logoutSuccess } = this.state;
     const { wallet, location } = this.props;
+    const { accounts, currentIndex } = wallet;
 
     return (
       <Layout active="setting">
@@ -65,8 +73,21 @@ class Setting extends Component {
           <Card>
             <List component="nav">
               <ListItem button>
-                <ListItemText primary="Language" />
-                <RightIcon />
+                <TextField
+                  id="select-account"
+                  select
+                  label="Current address"
+                  value={currentIndex}
+                  onChange={this.handleChangeCurrent}
+                  helperText="Change address"
+                  margin="normal"
+                >
+                  {_map(accounts, (x, i) => (
+                    <MenuItem key={x[0]} value={i}>
+                      Address_{i + 1} {x[0]}
+                    </MenuItem>
+                  ))}
+                </TextField>
               </ListItem>
               <ListItem button component={Link} to="/guide/write-down">
                 <ListItemText primary="Backup wallet" />

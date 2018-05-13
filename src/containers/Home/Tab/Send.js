@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
 import { Redirect } from 'react-router-dom';
-import _map from 'lodash/map';
 import _isEmpty from 'lodash/isEmpty';
 import { withStyles } from 'material-ui/styles';
 import TextField from 'material-ui/TextField';
@@ -42,10 +41,6 @@ class Send extends Component {
       [name]: event.target.value,
       [`${name}Error`]: '',
     });
-  };
-
-  handleChangeSender = (ev) => {
-    this.props.wallet.changeCurrent(ev.target.value);
   };
 
   handleSend = async (e) => {
@@ -93,6 +88,7 @@ class Send extends Component {
       className: classes.textFieldFormLabel,
     };
     const { loading, success } = this.state;
+    const [address] = accounts[currentIndex];
 
     if (success) {
       return <Redirect to="/" />;
@@ -113,24 +109,15 @@ class Send extends Component {
               >
                 <TextField
                   id="select-account"
-                  select
                   label="Sender"
-                  value={currentIndex}
-                  onChange={this.handleChangeSender}
-                  helperText="Choice sender"
+                  fullWidth
+                  value={address}
                   margin="normal"
                   InputProps={{
                     disableUnderline: true,
                     className: classes.textFieldUnit,
                   }}
-                  InputLabelProps={inputLabelProps}
-                >
-                  {_map(accounts, (x, i) => (
-                    <MenuItem key={x[0]} value={i}>
-                      Address_{i + 1} {x[0]}
-                    </MenuItem>
-                  ))}
-                </TextField>
+                />
 
                 <TextField
                   id="full-width"

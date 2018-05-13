@@ -27709,13 +27709,12 @@ const passwordCharTypes = [
   /[0-9]/,
   /[a-z]/,
   /[A-Z]/,
-  /[^0-9a-zA-Z]/,
 ];
 
 const errors = {
   logoutFirst: Error('The wallet already exists, before the generation, please logout first.'),
   passwordLength: Error('Password length at least 12 characters.'),
-  passwordFormat: Error('Password must contain uppercase, lowercase, numbers, and special characters.'),
+  passwordFormat: Error('Password must contain uppercase, lowercase, numbers characters.'),
   passwordError: Error('Password error.'),
   walletNotExists: Error('Wallet does not exists.'),
   neverBackup: Error('Never backup, you must be backed up.'),

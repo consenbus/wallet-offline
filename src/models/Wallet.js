@@ -397,7 +397,7 @@ const logout = password => {
   if (wallet.core) {
     try {
       wallet.core.logout(password);
-      wallet.error = null;
+      clearTempData();
     } catch (e) {
       wallet.error = e;
     }

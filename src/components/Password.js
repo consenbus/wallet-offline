@@ -27,7 +27,7 @@ class Password extends Component {
 
     return (
       <Dialog open fullScreen aria-labelledby="form-dialog-title">
-        <DialogTitle id="form-dialog-title">Input password to sign in</DialogTitle>
+        <DialogTitle id="form-dialog-title">Input password to check</DialogTitle>
         <DialogContent>
           <DialogContentText>
             This password is used to protect your wallet

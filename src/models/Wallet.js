@@ -10,7 +10,6 @@ const storeName = 'consenbus/wallet-offline';
 const reader = () => localStorage[storeName];
 
 const writer = (encrypted) => {
-  debugger
   localStorage[storeName] = encrypted;
 };
 
@@ -45,7 +44,6 @@ const initialize = (password, salt) => {
   try {
     wallet.core = ConsenbusWalletCore(password, salt, reader, writer);
   } catch (error) {
-    debugger
     wallet.error = error;
     return;
   }
@@ -121,6 +119,17 @@ const clearTempData = () => {
   writer('');
 };
 
+const logout = (password) => {
+  if (wallet.core) {
+    try {
+      wallet.core.logout(password);
+      wallet.error = null;
+    } catch (e) {
+      wallet.error = e;
+    }
+  }
+};
+
 const languages = () => ConsenbusWalletCore.languages;
 
 Object.assign(wallet, {
@@ -133,6 +142,7 @@ Object.assign(wallet, {
   restoreFromEntropy,
   isExists,
   clearTempData,
+  logout,
   setName,
   getName,
   languages,

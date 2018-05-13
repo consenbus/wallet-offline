@@ -2,13 +2,16 @@ import React, { Component } from 'react';
 import { Link, Redirect } from 'react-router-dom';
 import { observer, inject } from 'mobx-react';
 import _isEmpty from 'lodash/isEmpty';
-
+import _isString from 'lodash/isString';
+import _every from 'lodash/every';
 import { withStyles } from 'material-ui/styles';
 import IconButton from 'material-ui/IconButton';
 import TextField from 'material-ui/TextField';
 import Button from 'material-ui/Button';
 import teal from 'material-ui/colors/teal';
 import LeftIcon from 'material-ui-icons/KeyboardArrowLeft';
+import { MenuItem } from 'material-ui/Menu';
+import Select from 'material-ui/Select';
 
 import Layout from './_Layout';
 
@@ -47,15 +50,35 @@ const styles = theme => ({
   },
 });
 
+const langs = {
+  zh: '简体中文',
+  cht: '繁体中文',
+  en: 'English',
+  jp: '日本語',
+  kor: '한국어',
+  fra: 'Français',
+  spa: 'El español',
+  it: 'In Italiano',
+};
+const hex = new Set('0123456789abcdefABCDEF'.split(''));
+
 class Restore extends Component {
+  static isSeed(value) {
+    if (!_isString(value)) throw Error('Mnemonic/Seed must be a string.');
+    return value.length === 64 && _every(value.split(''), x => hex.has(x));
+  }
+
   state = {
+    language: 'en',
     success: false,
     name: '',
     nameError: '',
-    seed: '',
-    seedError: '',
-    // password: '',
-    // passwordError: '',
+    value: '',
+    valueError: '',
+    password: '',
+    passwordError: '',
+    confirmPassword: '',
+    confirmPasswordError: '',
   };
 
   handleChange = name => (event) => {
@@ -63,33 +86,50 @@ class Restore extends Component {
       [name]: event.target.value,
       [`${name}Error`]: '',
     });
-  };
+  }
 
-  handleCreateAccount = (e) => {
+  handleRestore = (e) => {
     e.preventDefault();
-    if (this.state.name === '') {
+    const {
+      name, password, confirmPassword, value, language,
+    } = this.state;
+    const { wallet } = this.props;
+
+    if (name === '') {
       this.setState({ nameError: 'Name must not be blank.' });
       return;
     }
 
-    if (this.state.seed === '') {
-      this.setState({ seedError: 'Seed must not be blank.' });
+    if (value === '') {
+      this.setState({ valueError: 'Mnemonic/Seed must not be blank.' });
       return;
     }
 
-    this.props.account
-      .restoreAccount(this.state.name, this.state.seed)
-      .then(() => {
-        this.setState({ success: true });
-      });
+    if (password !== confirmPassword) {
+      this.setState({ confirmPasswordError: 'Confirm password must be same the password.' });
+      return;
+    }
+
+    wallet.initialize(password);
+    if (Restore.isSeed(value)) {
+      wallet.restoreFromEntropy(value);
+    } else {
+      wallet.restoreFromMnemonic(value, language);
+    }
+
+    if (wallet.error) {
+      this.setState({ valueError: wallet.error.message });
+    } else {
+      this.setState({ success: true });
+    }
   };
 
   render() {
     if (this.state.success) {
-      return <Redirect to="/guide/backup" />;
+      return <Redirect to="/" />;
     }
 
-    const { classes } = this.props;
+    const { classes, wallet } = this.props;
 
     const inputProps = {
       disableUnderline: true,
@@ -124,7 +164,7 @@ class Restore extends Component {
             label="Account name"
             InputProps={inputProps}
             InputLabelProps={inputLabelProps}
-            placeholder=""
+            placeholder="Your name"
             fullWidth
             margin="normal"
             helperText={this.state.nameError}
@@ -134,17 +174,59 @@ class Restore extends Component {
           />
 
           <TextField
-            label="Seed"
+            label="Password"
+            type="password"
             InputProps={inputProps}
             InputLabelProps={inputLabelProps}
-            placeholder=""
+            placeholder="Your password"
+            helperText={this.state.passwordError}
+            fullWidth
+            value={this.state.password}
+            margin="normal"
+            error={!_isEmpty(this.state.passwordError)}
+            onChange={this.handleChange('password')}
+          />
+
+          <TextField
+            label="Confirm Password"
+            type="password"
+            InputProps={inputProps}
+            InputLabelProps={inputLabelProps}
+            placeholder="Confirm password"
+            helperText={this.state.confirmPasswordError}
+            fullWidth
+            value={this.state.confirmPassword}
+            margin="normal"
+            error={!_isEmpty(this.state.confirmPasswordError)}
+            onChange={this.handleChange('confirmPassword')}
+          />
+
+          <TextField
+            label="Mnemonic/Seed"
+            InputProps={inputProps}
+            InputLabelProps={inputLabelProps}
+            placeholder="Input your backup"
             fullWidth
             margin="normal"
-            helperText={this.state.seedError}
-            error={!_isEmpty(this.state.seedError)}
-            onChange={this.handleChange('seed')}
-            value={this.state.seed}
+            helperText={this.state.valueError}
+            error={!_isEmpty(this.state.valueError)}
+            onChange={this.handleChange('value')}
+            value={this.state.value}
           />
+          {this.state.value && !Restore.isSeed(this.state.value) && (
+            <Select
+              value={this.state.language}
+              onChange={this.handleChange('language')}
+              inputProps={{
+                name: 'language',
+                id: 'language-simple',
+              }}
+            >
+              {wallet.languages().map(x => (
+                <MenuItem key={x} value={x}>{langs[x]}</MenuItem>
+              ))}
+            </Select>
+          )}
 
         </form>
 
@@ -158,7 +240,7 @@ class Restore extends Component {
               color: 'white',
               backgroundColor: teal.A700,
             }}
-            onClick={this.handleCreateAccount}
+            onClick={this.handleRestore}
           >
             Restore the account
           </Button>
@@ -168,4 +250,4 @@ class Restore extends Component {
   }
 }
 
-export default withStyles(styles)(inject('account')(observer(Restore)));
+export default withStyles(styles)(inject('wallet')(observer(Restore)));

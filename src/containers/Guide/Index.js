@@ -50,7 +50,7 @@ class Index extends Component {
         </div>
 
         <div style={{ marginTop: '1rem' }}>
-          <Link href="/account/restore" to="/account/restore" style={{ color: 'white' }}>
+          <Link href="/guide/restore" to="/guide/restore" style={{ color: 'white' }}>
             Restore from backup
           </Link>
         </div>

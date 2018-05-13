@@ -46,7 +46,7 @@ const restore = () => {
   });
 };
 
-const NUM_THREADS = 3;
+const NUM_THREADS = NaN;
 
 const createTask = (hash) => {
   const work = { state: 'pending', spent_MS: 0 };

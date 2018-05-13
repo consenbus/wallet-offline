@@ -1,6 +1,6 @@
 var pow_initiate = function(threads, worker_path) {
 	if (typeof worker_path == 'undefined') { worker_path = ''; }
-	if (isNaN(threads)) { threads = self.navigator.hardwareConcurrency - 1; }
+	if (isNaN(threads)) { threads = Math.max(1, self.navigator.hardwareConcurrency - 1); }
 	var workers = [];
 	for (let i = 0; i < threads; i++) {
 		workers[i] = new Worker(worker_path + 'thread.js');
@@ -35,7 +35,7 @@ var pow_callback = function(workers, hash, ready, callback) {
 				    ready();
 				} else if (result !== false && result != "0000000000000000") {
 					pow_terminate (workers);
-					callback (result); 
+					callback (result);
 				}
 				else workers[i].postMessage(hash);
 			}

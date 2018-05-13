@@ -31,6 +31,7 @@ extendObservable(wallet, {
   accounts: [], // accounts [[address, publicKey], ...]
   currentIndex: 0, // current Index max value is 10
   currentBalance: 0, // balance of current selected account
+  currentInfo: {}, // current account info
   pendings: [], // 待接收交易
   currentHistory: [], // trade log of current selected account
 });
@@ -176,6 +177,18 @@ const pullPendings = async () => {
   wallet.pendings = pendings;
 };
 
+const pullAccountInfo = async () => {
+  const { accounts, currentIndex: index } = wallet;
+  const [address] = accounts[index];
+  const { data } = await rpc.post('/', {
+    action: 'account_info',
+    account: address,
+  });
+  if (data.error) return;
+  wallet.currentInfo = data;
+  store.setItem(`accountInfo_${index}`, data);
+};
+
 // 自动拉取数据
 const pull = async () => {
   if (!wallet.core || !wallet.core.exists()) return;
@@ -183,6 +196,9 @@ const pull = async () => {
 
   // pull accounts_pending
   await pullPendings();
+
+  // pull account_info
+  await pullAccountInfo();
 };
 
 const receiver = async () => {
@@ -209,12 +225,15 @@ const changeCurrent = (index) => {
   if (index >= 0 && index <= 9) {
     wallet.currentIndex = index;
     wallet.error = null;
-    const storeKey = `history_${index}`;
     wallet.currentHistory = [];
-    store.getItem(storeKey, (error, list) => {
+    store.getItem(`history_${index}`, (error, list) => {
       if (error) return;
       if (!Array.isArray(list)) return;
       wallet.currentHistory = list;
+    });
+    store.getItem(`accountInfo_${index}`, (error, info) => {
+      if (error || !info) return;
+      wallet.currentInfo = info || {};
     });
   } else {
     wallet.error = Error('The minimum value of index is 0 and the maximum is 9.');
@@ -303,6 +322,10 @@ const getName = () => localStorage[storeNameKey];
 const clearTempData = () => {
   wallet.error = null;
   setName('');
+  _times(10, (index) => {
+    store.setItem(`history_${index}`, '');
+    store.setItem(`accountInfo_${index}`, '');
+  });
   writer('');
 };
 

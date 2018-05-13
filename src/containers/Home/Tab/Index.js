@@ -10,6 +10,7 @@ import Layout from '../_Layout';
 import Header from './_Header';
 import AppSearch from '../../Explorer/_Search';
 import HistoryList from '../Account/HistoryList';
+import converter from '../../../utils/converter';
 
 class Index extends Component {
   state = {
@@ -19,20 +20,8 @@ class Index extends Component {
     const { wallet } = this.props;
 
     const {
-      accounts, currentIndex, currentBalance, currentHistory,
+      accounts, currentIndex, currentInfo, currentHistory,
     } = wallet;
-
-    const action = (
-      <div
-        style={{
-          margin: '1rem',
-          fontSize: '2rem',
-          color: Red.A400,
-        }}
-      >
-        {currentBalance}
-      </div>
-    );
 
     return (
       <Layout active="home">
@@ -42,7 +31,17 @@ class Index extends Component {
         <div style={{ padding: 20 }}>
           <Card>
             <CardHeader
-              action={action}
+              action={
+                <div
+                  style={{
+                    margin: '1rem',
+                    fontSize: '2rem',
+                    color: Red.A400,
+                  }}
+                >
+                  {converter.unit(currentInfo.balance || '0', 'raw', 'BUS')}
+                </div>
+              }
               title={wallet.getName()}
             />
             <div className="ellipsis" style={{ margin: '1rem' }}>

@@ -1,6 +1,8 @@
 import { extendObservable } from 'mobx';
 import _times from 'lodash/times';
 import ConsenbusWalletCore from 'consenbus-wallet-core';
+import rpc from '../utils/rpc';
+import store from '../utils/store';
 // import converter from '../utils/converter';
 
 // let representative = 'bus_1zrzcmckjhjcpcepmuua8fyqiq4e4exgt1ruxw4hymgfchiyeaa536w8fyot';
@@ -22,13 +24,45 @@ extendObservable(wallet, {
   accounts: [], // accounts [[address, publicKey], ...]
   currentIndex: 0, // current Index max value is 10
   currentBalance: 0, // balance of current selected account
+  pending: [], // 待接收交易
   currentHistory: [], // trade log of current selected account
 });
+
+// 自动拉取数据
+const pull = async () => {
+  if (!wallet.core || !wallet.core.exists()) return;
+  const { accounts, currentIndex: index } = wallet;
+  const [address, publicKey] = accounts[index];
+  const { data } = await rpc.post('/', {
+    action: 'account_history',
+    account: address,
+    count: 500,
+  });
+  if (Array.isArray(data.history)) {
+    wallet.currentHistory = data.history;
+    store.setItem(`history_${index}`, data.history);
+  }
+};
+
+const runner = async () => {
+  await pull();
+  setTimeout(() => {
+    runner();
+  }, 30 * 1000);
+};
+runner();
 
 const changeCurrent = (index) => {
   if (index >= 0 && index <= 9) {
     wallet.currentIndex = index;
     wallet.error = null;
+    const storeKey = `history_${index}`;
+    wallet.currentHistory = [];
+    store.getItem(storeKey, (error, list) => {
+      if (error) return;
+      if (!Array.isArray(list)) return;
+      wallet.currentHistory = list;
+    });
   } else {
     wallet.error = Error('The minimum value of index is 0 and the maximum is 9.');
   }

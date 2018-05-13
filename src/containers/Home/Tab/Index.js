@@ -1,24 +1,18 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
 import { observer, inject } from 'mobx-react';
-import { withStyles } from 'material-ui/styles';
 
-import List, { ListItem, ListItemText } from 'material-ui/List';
 import Card, { CardHeader } from 'material-ui/Card';
 import Paper from 'material-ui/Paper';
 import Divider from 'material-ui/Divider';
 import Red from 'material-ui/colors/red';
 import Menu, { MenuItem } from 'material-ui/Menu';
+import Button from 'material-ui/Button';
 import _map from 'lodash/map';
 
 import Layout from '../_Layout';
 import Header from './_Header';
 import AppSearch from '../../Explorer/_Search';
-
-const styles = {
-  search: {
-  },
-};
+import HistoryList from '../Account/HistoryList';
 
 class Index extends Component {
   state = {
@@ -40,7 +34,7 @@ class Index extends Component {
   }
 
   render() {
-    const { wallet, classes } = this.props;
+    const { wallet } = this.props;
     const { anchorEl } = this.state;
 
     const {
@@ -63,9 +57,7 @@ class Index extends Component {
       <Layout active="home">
         <Header />
 
-        <div className={classes.search}>
-          <Paper><AppSearch /></Paper>
-        </div>
+        <Paper><AppSearch /></Paper>
         <div style={{ padding: 20 }}>
           <Card>
             <CardHeader
@@ -73,7 +65,8 @@ class Index extends Component {
               title={wallet.getName()}
             />
             <div className="ellipsis" style={{ margin: '1rem' }}>
-              <span onClick={this.handleClickListItem}>Switch</span>Address_{currentIndex + 1}: {accounts[currentIndex][0]}
+              <Button onClick={this.handleClickListItem}>Switch</Button>
+              Address_{currentIndex + 1}: {accounts[currentIndex][0]}
             </div>
             <Menu
               id="switch-account"
@@ -92,8 +85,7 @@ class Index extends Component {
               ))}
             </Menu>
             <Divider />
-
-            <div>currentHistory blocks</div>
+            <HistoryList list={currentHistory} />
           </Card>
         </div>
       </Layout>
@@ -101,4 +93,4 @@ class Index extends Component {
   }
 }
 
-export default withStyles(styles)(inject('wallet')(observer(Index)));
+export default inject('wallet')(observer(Index));

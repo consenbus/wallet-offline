@@ -14,14 +14,15 @@ import styles from '../../../styles/form';
 class Representative extends Component {
   state = {
     success: false,
+    password: '',
+    passwordError: '',
     representative: '',
     representativeError: '',
   };
 
   componentWillMount() {
-    const account = this.props.match.params.account;
-    this.props.account.changeCurrentAccount(account);
-    this.props.account.getRepresentative().then((rep) => {
+    const { wallet } = this.props;
+    wallet.getRepresentative().then((rep) => {
       this.setState({ representative: rep || 'null' });
     });
   }
@@ -33,23 +34,38 @@ class Representative extends Component {
     });
   };
 
-  handleEditRepresentative = (e) => {
+  handleEditRepresentative = async (e) => {
     e.preventDefault();
-    if (this.state.representative === '') {
+
+    const { wallet } = this.props;
+    const { representative, password } = this.state;
+    if (representative === '') {
       this.setState({
         representativeError: 'Representative account must not be blank.',
       });
       return;
     }
 
-    this.props.account.change(this.state.representative);
+    if (password === '') {
+      this.setState({
+        passwordError: 'Password must not be blank.',
+      });
+      return;
+    }
+
+    try {
+      await wallet.changeRepresentative(this.state.representative, password);
+    } catch (error) {
+      this.setState({ passwordError: error.message });
+      return;
+    }
     this.setState({ success: true });
   };
 
   render() {
     const accountParam = this.props.match.params.account;
     if (this.state.success) {
-      return <Redirect to={`/accounts/${accountParam}`} />;
+      return <Redirect to="/" />;
     }
 
     const { classes } = this.props;
@@ -80,8 +96,6 @@ class Representative extends Component {
                 className={classes.container}
                 noValidate
                 autoComplete="off"
-                method="post"
-                onSubmit={this.handleCreateAccount}
               >
                 <TextField
                   id="full-width"
@@ -95,6 +109,20 @@ class Representative extends Component {
                   error={!_isEmpty(this.state.representativeError)}
                   margin="normal"
                   onChange={this.handleChange('representative')}
+                />
+                <TextField
+                  id="wallet-password"
+                  label="Recipient"
+                  InputProps={inputProps}
+                  InputLabelProps={inputLabelProps}
+                  placeholder="Wallet password"
+                  margin="normal"
+                  type="password"
+                  fullWidth
+                  helperText={this.state.passwordError}
+                  error={!_isEmpty(this.state.passwordError)}
+                  value={this.state.password}
+                  onChange={this.handleChange('password')}
                 />
               </form>
             </CardContent>
@@ -125,4 +153,4 @@ class Representative extends Component {
   }
 }
 
-export default withStyles(styles)(inject('account')(observer(Representative)));
+export default withStyles(styles)(inject('wallet')(observer(Representative)));

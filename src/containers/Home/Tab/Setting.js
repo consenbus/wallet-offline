@@ -89,6 +89,11 @@ class Setting extends Component {
                   ))}
                 </TextField>
               </ListItem>
+              <ListItem button component={Link} to="/accounts/representative">
+                <ListItemText primary="Change representative" />
+                <RightIcon />
+              </ListItem>
+
               <ListItem button component={Link} to="/guide/write-down">
                 <ListItemText primary="Backup wallet" />
                 <RightIcon />

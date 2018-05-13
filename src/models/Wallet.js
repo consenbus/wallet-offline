@@ -51,12 +51,12 @@ const changeRepresentative = async (representativer, password) => {
   const { currentIndex, core, currentInfo: info } = wallet;
 
   // Step 3. Generate Proof of Work from your account's frontier
-  const work = await pow(info.data.frontier);
+  const work = await pow(info.frontier);
 
   // Step 4. Generate a send block
   const block = {
     type: 'change',
-    previous: info.data.frontier,
+    previous: info.frontier,
     representative: publicKeyFromAddress(representativer),
     work,
   };
@@ -270,7 +270,7 @@ const runner = async () => {
   } catch (e) {
     console.error(e);
   }
-  setTimeout(runner, 10 * 1000);
+  setTimeout(runner, 60 * 1000);
 };
 runner();
 

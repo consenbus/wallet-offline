@@ -3,7 +3,7 @@ import retry from 'async/retry';
 
 let enabledBaseURLIndex = 0;
 const baseURLs = [
-  'http://test.consenbus.org:55000',
+  'http://node-test.consenbus.org:55000',
 ];
 
 /* production

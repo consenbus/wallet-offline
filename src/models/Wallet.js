@@ -44,6 +44,7 @@ function writer(encrypted) {
 
 async function pullAccountInfo(index) {
   const { accounts, currentIndex } = wallet;
+  if (accounts.length === 0) return {};
   const [address, publicKey] = accounts[index];
   const { data } = await rpc.post("/", {
     action: "account_info",
@@ -63,6 +64,7 @@ async function pullAccountInfo(index) {
 
 async function pullHistoryList(index) {
   const { accounts, currentIndex } = wallet;
+  if (accounts.length === 0) return;
   const [address] = accounts[index];
   const { data } = await rpc.post("/", {
     action: "account_history",
@@ -141,7 +143,7 @@ async function send(amount, unit, toAccountAddress, password) {
 
   // Step 2. Retrieve your account info to get your latest block hash (frontier)
   // and balance
-  const info = pullAccountInfo(currentIndex);
+  const info = await pullAccountInfo(currentIndex);
 
   // Step 3. Generate Proof of Work from your account's frontier
   const work = await pow(info.frontier);
@@ -238,6 +240,7 @@ async function receive() {
 
 async function pullPendings() {
   const { accounts } = wallet;
+  if (accounts.length === 0) return;
   const {
     data: { blocks }
   } = await rpc.post("/", {
@@ -317,13 +320,13 @@ function makeAccounts() {
 function initialize(password, salt) {
   try {
     wallet.core = ConsenbusWalletCore(password, salt, reader, writer);
-    startUpdateTask();
   } catch (error) {
     wallet.error = error;
     return;
   }
   wallet.error = null;
   makeAccounts();
+  startUpdateTask();
 }
 
 function generate() {

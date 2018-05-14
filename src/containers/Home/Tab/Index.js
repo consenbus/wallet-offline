@@ -1,59 +1,65 @@
-import React, { Component } from 'react';
-import { observer, inject } from 'mobx-react';
+import React, { Component } from "react";
+import { observer, inject } from "mobx-react";
+import { withStyles } from "material-ui/styles";
+import Typography from "material-ui/Typography";
+import blue from "material-ui/colors/blue";
 
-import Card, { CardHeader } from 'material-ui/Card';
-import Paper from 'material-ui/Paper';
-import Divider from 'material-ui/Divider';
-import Red from 'material-ui/colors/red';
+import Layout from "../_Layout";
+import Header from "./_Header";
+import HistoryList from "../Account/HistoryList";
+import converter from "../../../utils/converter";
 
-import Layout from '../_Layout';
-import Header from './_Header';
-import AppSearch from '../../Explorer/_Search';
-import HistoryList from '../Account/HistoryList';
-import converter from '../../../utils/converter';
+const styles = {
+  name: {
+    color: "#f6f6f6",
+    fontSize: "20px"
+  }
+};
 
 class Index extends Component {
-  state = {
-  }
+  state = {};
 
   render() {
-    const { wallet } = this.props;
+    const { classes, wallet } = this.props;
 
     const {
-      accounts, currentIndex, currentInfo, currentHistory,
+      name,
+      accounts,
+      currentIndex,
+      currentInfo,
+      currentHistory
     } = wallet;
+
+    const [address] = accounts[currentIndex];
 
     return (
       <Layout active="home">
-        <Header />
-
-        <Paper><AppSearch /></Paper>
-        <div style={{ padding: 20 }}>
-          <Card>
-            <CardHeader
-              action={
-                <div
-                  style={{
-                    margin: '1rem',
-                    fontSize: '2rem',
-                    color: Red.A400,
-                  }}
-                >
-                  {converter.unit(currentInfo.balance || '0', 'raw', 'BUS')}
-                </div>
-              }
-              title={wallet.getName()}
-            />
-            <div className="ellipsis" style={{ margin: '1rem' }}>
-              Address_{currentIndex + 1}: {accounts[currentIndex][0]}
-            </div>
-            <Divider />
-            <HistoryList list={currentHistory} />
-          </Card>
+        <Header title="Balance" />
+        <div
+          style={{
+            backgroundColor: blue.A700,
+            color: "white",
+            textAlign: "center",
+            paddingTop: "50px",
+            paddingBottom: "50px"
+          }}
+        >
+          <Typography variant="display1" color="inherit">
+            <span className={classes.name}>{name}</span>
+            <span className="ellipsis">
+              {converter.unit(currentInfo.balance || 0, "raw", "BUS")} BUS
+            </span>
+          </Typography>
+          <Typography variant="subheading" color="inherit">
+            <span className="ellipsis">
+              Address_{currentIndex + 1} {address}
+            </span>
+          </Typography>
         </div>
+        <HistoryList list={currentHistory} />
       </Layout>
     );
   }
 }
 
-export default inject('wallet')(observer(Index));
+export default withStyles(styles)(inject("wallet")(observer(Index)));

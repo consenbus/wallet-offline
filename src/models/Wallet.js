@@ -1,6 +1,7 @@
 import { extendObservable } from "mobx";
 import _times from "lodash/times";
 import _each from "lodash/each";
+import _once from "lodash/once";
 import ConsenbusWalletCore from "consenbus-wallet-core";
 import rpc from "../utils/rpc";
 import store from "../utils/store";
@@ -15,16 +16,12 @@ const {
 let representative =
   "bus_1zrzcmckjhjcpcepmuua8fyqiq4e4exgt1ruxw4hymgfchiyeaa536w8fyot";
 
-const storeName = "consenbus/wallet-offline";
-
-const reader = () => localStorage[storeName];
-
-const writer = encrypted => {
-  localStorage[storeName] = encrypted;
+const storeKeys = {
+  wallet: "consenbus/wallet-offline",
+  name: "consenbus/wallet-name"
 };
 
 const wallet = {};
-
 extendObservable(wallet, {
   core: null,
   error: null,
@@ -37,7 +34,48 @@ extendObservable(wallet, {
   currentHistory: [] // trade log of current selected account
 });
 
-const getRepresentative = async () => {
+function reader() {
+  return localStorage[storeKeys.wallet];
+}
+
+function writer(encrypted) {
+  localStorage[storeKeys.wallet] = encrypted;
+}
+
+async function pullAccountInfo(index) {
+  const { accounts, currentIndex } = wallet;
+  const [address, publicKey] = accounts[index];
+  const { data } = await rpc.post("/", {
+    action: "account_info",
+    account: address
+  });
+  if (!data.error) {
+    // update current account
+    if (currentIndex === index) wallet.currentInfo = data;
+    // save to store
+    store.setItem(`accountInfo_${index}`, data);
+  }
+
+  // pre calc pow
+  pow(data.frontier || publicKey);
+  return data;
+}
+
+async function pullHistoryList(index) {
+  const { accounts, currentIndex } = wallet;
+  const [address] = accounts[index];
+  const { data } = await rpc.post("/", {
+    action: "account_history",
+    account: address,
+    count: 500
+  });
+  if (Array.isArray(data.history)) {
+    if (index === currentIndex) wallet.currentHistory = data.history;
+    store.setItem(`history_${index}`, data.history);
+  }
+}
+
+async function getRepresentative() {
   const { currentIndex, accounts } = wallet;
   const [address] = accounts[currentIndex];
   const { data } = await rpc.post("/", {
@@ -46,10 +84,12 @@ const getRepresentative = async () => {
   });
 
   return data.representative;
-};
+}
 
-const changeRepresentative = async (representativer, password) => {
+async function changeRepresentative(representativer, password) {
   const { currentIndex, core, currentInfo: info } = wallet;
+
+  if (info.frontier) throw Error("Account not found");
 
   // Step 3. Generate Proof of Work from your account's frontier
   const work = await pow(info.frontier);
@@ -79,7 +119,7 @@ const changeRepresentative = async (representativer, password) => {
 
   if (res.data.error) {
     console.error(res);
-    throw new Error(res.data.error);
+    throw Error(res.data.error);
   }
 
   representative = representativer;
@@ -87,34 +127,32 @@ const changeRepresentative = async (representativer, password) => {
   // push the newist hash to pow calc pool
   pow(res.data.hash);
 
-  return res;
-};
+  pullHistoryList(currentIndex);
+  pullAccountInfo(currentIndex);
 
-const send = async (amount, unit, toAccountAddress, password) => {
-  const { core, currentIndex, accounts } = wallet;
-  const [address] = accounts[currentIndex];
+  return res;
+}
+
+async function send(amount, unit, toAccountAddress, password) {
+  const { core, currentIndex } = wallet;
 
   // Step 1. Convert amount to raw 128-bit stringified integer. Since converion
   const rawAmount = converter.unit(amount, unit, "raw");
 
   // Step 2. Retrieve your account info to get your latest block hash (frontier)
   // and balance
-  const info = await rpc.post("/", {
-    action: "account_info",
-    account: address,
-    count: 1
-  });
+  const info = pullAccountInfo(currentIndex);
 
   // Step 3. Generate Proof of Work from your account's frontier
-  const work = await pow(info.data.frontier);
+  const work = await pow(info.frontier);
 
   // Step 4. Generate a send block
   const block = {
     type: "send",
-    previous: info.data.frontier,
+    previous: info.frontier,
     destination: publicKeyFromAddress(toAccountAddress),
     balance: dec2hex(
-      converter.minus(info.data.balance, rawAmount),
+      converter.minus(info.balance, rawAmount),
       16
     ).toUpperCase(),
     work
@@ -136,16 +174,19 @@ const send = async (amount, unit, toAccountAddress, password) => {
 
   if (res.data.error) {
     console.error(res);
-    throw new Error(res.data.error);
+    throw Error(res.data.error);
   }
 
   // push the newist hash to pow calc pool
   pow(res.data.hash);
 
-  return res;
-};
+  pullHistoryList(currentIndex);
+  pullAccountInfo(currentIndex);
 
-const receive = async () => {
+  return res;
+}
+
+async function receive() {
   const { core, pendings } = wallet;
   if (!core || !core.exists()) return;
   if (pendings.length === 0) return;
@@ -155,13 +196,9 @@ const receive = async () => {
   const { index, address, publicKey, hash } = pending;
 
   // Step 1. Retrieve your account info to get your latest block hash (frontier)
-  const info = await rpc.post("/", {
-    action: "account_info",
-    account: address,
-    count: 1
-  });
+  const info = await pullAccountInfo(index);
 
-  const previous = info.data.frontier || publicKey;
+  const previous = info.frontier || publicKey;
 
   // Step 2. Generate Proof of Work from your account's frontier
   const work = await pow(previous);
@@ -192,25 +229,14 @@ const receive = async () => {
     block: JSON.stringify(newBlock)
   });
 
+  pullHistoryList(index);
+  pullAccountInfo(index);
+
   // push newist hash to pow calc pool
   pow(res.data.hash);
-};
+}
 
-const pullHistoryList = async () => {
-  const { accounts, currentIndex: index } = wallet;
-  const [address] = accounts[index];
-  const { data } = await rpc.post("/", {
-    action: "account_history",
-    account: address,
-    count: 500
-  });
-  if (Array.isArray(data.history)) {
-    wallet.currentHistory = data.history;
-    store.setItem(`history_${index}`, data.history);
-  }
-};
-
-const pullPendings = async () => {
+async function pullPendings() {
   const { accounts } = wallet;
   const {
     data: { blocks }
@@ -232,56 +258,32 @@ const pullPendings = async () => {
     });
   });
   wallet.pendings = pendings;
-};
+}
 
-const pullAccountInfo = async () => {
-  const { accounts, currentIndex: index } = wallet;
-  const [address] = accounts[index];
-  const { data } = await rpc.post("/", {
-    action: "account_info",
-    account: address
-  });
-  if (data.error) return;
-  wallet.currentInfo = data;
-  store.setItem(`accountInfo_${index}`, data);
-};
-
-// 自动拉取数据
-const pull = async () => {
-  if (!wallet.core || !wallet.core.exists()) return;
-  await pullHistoryList();
-
-  // pull accounts_pending
-  await pullPendings();
-
-  // pull account_info
-  await pullAccountInfo();
-};
-
-const receiver = async () => {
-  try {
-    await receive();
-  } catch (e) {
-    console.error(e);
+function runner(fn, sleep, isCurrent = false) {
+  async function goRun() {
+    try {
+      await fn(isCurrent && wallet.currentIndex);
+    } catch (e) {
+      console.error(e);
+    }
+    setTimeout(goRun, sleep);
   }
-  setTimeout(receiver, 5 * 1000);
-};
-receiver();
+  return goRun;
+}
 
-const runner = async () => {
-  try {
-    await pull();
-  } catch (e) {
-    console.error(e);
-  }
-  setTimeout(runner, 60 * 1000);
-};
-runner();
+const startUpdateTask = _once(() => {
+  runner(pullHistoryList, 120 * 1000, true)();
+  runner(pullPendings, 20 * 1000)();
+  runner(pullAccountInfo, 300 * 1000, true)();
+  runner(receive, 5 * 1000)();
+});
 
-const changeCurrent = index => {
+function changeCurrent(index) {
   if (index >= 0 && index <= 9) {
     wallet.currentIndex = index;
     wallet.error = null;
+
     wallet.currentHistory = [];
     store.getItem(`history_${index}`, (error, list) => {
       if (error) return;
@@ -293,34 +295,38 @@ const changeCurrent = index => {
       if (error || !info) return;
       wallet.currentInfo = info || {};
     });
+
+    pullAccountInfo(index);
+    pullHistoryList(index);
   } else {
     wallet.error = Error(
       "The minimum value of index is 0 and the maximum is 9."
     );
   }
-};
+}
 
-const makeAccounts = () => {
+function makeAccounts() {
   if (!wallet.core || !wallet.core.exists()) return;
   wallet.accounts = _times(10, i => [
     wallet.core.getAddress(i),
     wallet.core.getPublicKey(i)
   ]);
   changeCurrent(0);
-};
+}
 
-const initialize = (password, salt) => {
+function initialize(password, salt) {
   try {
     wallet.core = ConsenbusWalletCore(password, salt, reader, writer);
+    startUpdateTask();
   } catch (error) {
     wallet.error = error;
     return;
   }
   wallet.error = null;
   makeAccounts();
-};
+}
 
-const generate = () => {
+function generate() {
   try {
     wallet.core.generate();
     makeAccounts();
@@ -328,9 +334,9 @@ const generate = () => {
   } catch (e) {
     wallet.error = e;
   }
-};
+}
 
-const backupFromMnemonic = (password, language) => {
+function backupFromMnemonic(password, language) {
   try {
     const mnemonic = wallet.core.backupFromMnemonic(password, language);
     wallet.error = null;
@@ -339,9 +345,9 @@ const backupFromMnemonic = (password, language) => {
     wallet.error = e;
   }
   return false;
-};
+}
 
-const backupFromEntropy = password => {
+function backupFromEntropy(password) {
   try {
     const entropy = wallet.core.backupFromEntropy(password);
     wallet.error = null;
@@ -350,9 +356,9 @@ const backupFromEntropy = password => {
     wallet.error = e;
   }
   return false;
-};
+}
 
-const restoreFromMnemonic = (mnemonic, language) => {
+function restoreFromMnemonic(mnemonic, language) {
   try {
     wallet.core.restoreFromMnemonic(mnemonic, language);
     makeAccounts();
@@ -360,9 +366,9 @@ const restoreFromMnemonic = (mnemonic, language) => {
   } catch (e) {
     wallet.error = e;
   }
-};
+}
 
-const restoreFromEntropy = entropy => {
+function restoreFromEntropy(entropy) {
   try {
     wallet.core.restoreFromEntropy(entropy);
     makeAccounts();
@@ -370,29 +376,32 @@ const restoreFromEntropy = entropy => {
   } catch (e) {
     wallet.error = e;
   }
-};
+}
 
-const isExists = () => !!reader();
+function isExists() {
+  return !!reader();
+}
 
-const storeNameKey = "consenbus/wallet-name";
-const setName = name => {
-  localStorage[storeNameKey] = name;
+function setName(name) {
+  localStorage[storeKeys.name] = name;
   wallet.name = name;
-};
+}
 
-const getName = () => localStorage[storeNameKey];
+function getName() {
+  return localStorage[storeKeys.name];
+}
 
-const clearTempData = () => {
+function clearTempData() {
   wallet.error = null;
   setName("");
+  writer("");
   _times(10, index => {
     store.setItem(`history_${index}`, "");
     store.setItem(`accountInfo_${index}`, "");
   });
-  writer("");
-};
+}
 
-const logout = password => {
+function logout(password) {
   if (wallet.core) {
     try {
       wallet.core.logout(password);
@@ -401,9 +410,11 @@ const logout = password => {
       wallet.error = e;
     }
   }
-};
+}
 
-const languages = () => ConsenbusWalletCore.languages;
+function languages() {
+  return ConsenbusWalletCore.languages;
+}
 
 Object.assign(wallet, {
   initialize,

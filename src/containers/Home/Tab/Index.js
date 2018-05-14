@@ -52,7 +52,8 @@ class Index extends Component {
           </Typography>
           <Typography variant="subheading" color="inherit">
             <span className="ellipsis">
-              Address_{currentIndex + 1} {address}
+              <span>Address_{currentIndex + 1}: </span>
+              {address}
             </span>
           </Typography>
         </div>

@@ -1,11 +1,7 @@
-import Block from './Block';
-import Account from './Account';
-import wallet from './Wallet';
+import wallet from "./Wallet";
 
 const models = {
-  wallet,
-  block: new Block(),
-  account: new Account(),
+  wallet
 };
 
 export default models;

@@ -18,6 +18,7 @@
     "mocha": true
   },
   "rules": {
+    "no-restricted-globals": 1,
     "react/prop-types": "off",
     "react/prefer-stateless-function": "off",
     "react/require-extension": "off",

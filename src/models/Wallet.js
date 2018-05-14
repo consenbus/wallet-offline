@@ -1,13 +1,11 @@
 import { extendObservable } from "mobx";
 import _times from "lodash/times";
 import _each from "lodash/each";
+import ConsenbusWalletCore from "consenbus-wallet-core";
 import rpc from "../utils/rpc";
 import store from "../utils/store";
 import pow from "../utils/wallet/pow";
 import converter from "../utils/converter";
-// import ConsenbusWalletCore from '../utils/core';
-
-const { ConsenbusWalletCore } = window;
 
 const {
   wallet: { publicKeyFromAddress },

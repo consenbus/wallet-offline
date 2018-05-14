@@ -299,7 +299,7 @@ function changeCurrent(index) {
       wallet.currentInfo = info || {};
     });
 
-    store.setItem(`currentIndex`, index);
+    store.setItem("currentIndex", index);
     pullAccountInfo(index);
     pullHistoryList(index);
   } else {

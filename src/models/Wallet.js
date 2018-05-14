@@ -299,6 +299,7 @@ function changeCurrent(index) {
       wallet.currentInfo = info || {};
     });
 
+    store.setItem(`currentIndex`, index);
     pullAccountInfo(index);
     pullHistoryList(index);
   } else {
@@ -314,7 +315,11 @@ function makeAccounts() {
     wallet.core.getAddress(i),
     wallet.core.getPublicKey(i)
   ]);
-  changeCurrent(0);
+
+  store.getItem("currentIndex", (error, index) => {
+    changeCurrent(index | 0);
+    startUpdateTask();
+  });
 }
 
 function initialize(password, salt) {
@@ -326,7 +331,6 @@ function initialize(password, salt) {
   }
   wallet.error = null;
   makeAccounts();
-  startUpdateTask();
 }
 
 function generate() {

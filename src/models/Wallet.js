@@ -290,6 +290,7 @@ const changeCurrent = index => {
       if (!Array.isArray(list)) return;
       wallet.currentHistory = list;
     });
+    wallet.currentInfo = {};
     store.getItem(`accountInfo_${index}`, (error, info) => {
       if (error || !info) return;
       wallet.currentInfo = info || {};

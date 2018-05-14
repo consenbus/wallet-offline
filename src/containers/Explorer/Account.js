@@ -1,37 +1,16 @@
 import React from "react";
-import _map from "lodash/map";
-import { observer } from "mobx-react";
-import { Link } from "react-router-dom";
-
 import { withStyles } from "material-ui/styles";
-import pink from "material-ui/colors/pink";
-import green from "material-ui/colors/green";
 import Divider from "material-ui/Divider";
-import Avatar from "material-ui/Avatar";
-import List, { ListItem, ListItemText } from "material-ui/List";
 import Card, { CardHeader } from "material-ui/Card";
 import { LinearProgress } from "material-ui/Progress";
-import AddCircleOutlineIcon from "material-ui-icons/AddCircleOutline";
-import RemoveCircleOutlineIcon from "material-ui-icons/RemoveCircleOutline";
 
 import converter from "../../utils/converter";
-
+import HistoryList from "../Home/Account/HistoryList";
 import Layout from "../Home/_Layout";
 import Header from "../Home/Tab/_Header";
 import rpc from "../../utils/rpc";
 
 const styles = {
-  avatar: {},
-  pinkAvatar: {
-    color: "#fff",
-    backgroundColor: pink[500],
-    marginRight: "10px"
-  },
-  greenAvatar: {
-    color: "#fff",
-    backgroundColor: green[500],
-    marginRight: "10px"
-  },
   error: {
     border: "1px solid #ffa39e",
     backgroundColor: "#fff1f0",
@@ -158,39 +137,11 @@ class Account extends React.Component {
                 />
               )}
             <Divider />
-            <List>
-              {historyError && (
-                <div className={classes.error}>{historyError.message}</div>
-              )}
-              {historyLoading && <LinearProgress />}
-              {!historyLoading &&
-                !historyError &&
-                _map(history, h => (
-                  <ListItem component={Link} to={`/explorer/blocks/${h.hash}`}>
-                    {h.type === "receive" ? (
-                      <Avatar className={classes.greenAvatar}>
-                        <AddCircleOutlineIcon />
-                      </Avatar>
-                    ) : (
-                      <Avatar className={classes.pinkAvatar}>
-                        <RemoveCircleOutlineIcon />
-                      </Avatar>
-                    )}
-                    <span
-                      style={{ textOverflow: "ellipsis", overflow: "hidden" }}
-                    >
-                      <ListItemText
-                        primary={h.account}
-                        secondary={`${converter.unit(
-                          h.amount || 0,
-                          "raw",
-                          "BUS"
-                        )} BUS`}
-                      />
-                    </span>
-                  </ListItem>
-                ))}
-            </List>
+            {historyError && (
+              <div className={classes.error}>{historyError.message}</div>
+            )}
+            {historyLoading && <LinearProgress />}
+            {!historyLoading && !historyError && <HistoryList list={history} />}
           </Card>
         </div>
       </Layout>
@@ -198,4 +149,4 @@ class Account extends React.Component {
   }
 }
 
-export default withStyles(styles)(observer(Account));
+export default withStyles(styles)(Account);

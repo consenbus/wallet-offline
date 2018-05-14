@@ -14,7 +14,7 @@ class Scan extends Component {
 
   handleScan = data => {
     if (data) {
-      const i = data.indexOf("bus_");
+      const i = data.startsWith("bus_");
       this.setState({
         result: data,
         success: i !== -1
@@ -29,7 +29,7 @@ class Scan extends Component {
   render() {
     const { result, success, error } = this.state;
     if (success) {
-      return <Redirect to={`/tab/send?to=${result}`} />;
+      return <Redirect to={`/tab/send/${result}`} />;
     }
 
     return (

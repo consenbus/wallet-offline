@@ -14,8 +14,8 @@ import styles from "../../../styles/form";
 
 class Send extends Component {
   state = {
-    account: "",
-    accountError: "",
+    to: "",
+    toError: "",
     amount: "",
     amountError: "",
     unit: "BUS",
@@ -24,6 +24,11 @@ class Send extends Component {
     loading: false,
     success: false
   };
+
+  componentWillMount() {
+    const { to } = this.props.match.params;
+    if (to && to.startsWith("bus_")) this.setState({ to });
+  }
 
   handleChangeForm = name => event => {
     this.setState({
@@ -34,22 +39,22 @@ class Send extends Component {
 
   handleSend = async e => {
     e.preventDefault();
-    if (this.state.account === "") {
-      this.setState({ accountError: "Recipient address must not be blank." });
+
+    const { wallet } = this.props;
+    const { amount, unit, password, to } = this.state;
+    if (to === "") {
+      this.setState({ toError: "Recipient address must not be blank." });
       return;
     }
 
-    if (this.state.amount === "") {
+    if (amount === "") {
       this.setState({ amountError: "Amount must not be blank." });
       return;
     }
 
-    const { amount, unit, password, account: toAccountAddress } = this.state;
-    const { wallet } = this.props;
-
     this.setState({ loading: true });
     try {
-      await wallet.send(amount, unit, toAccountAddress, password);
+      await wallet.send(amount, unit, to, password);
     } catch (error) {
       this.setState({ passwordError: error.message, loading: false });
       return;
@@ -117,10 +122,10 @@ class Send extends Component {
                   placeholder="Recipient address"
                   margin="normal"
                   fullWidth
-                  helperText={this.state.accountError}
-                  error={!_isEmpty(this.state.accountError)}
-                  value={this.state.account}
-                  onChange={this.handleChangeForm("account")}
+                  helperText={this.state.toError}
+                  error={!_isEmpty(this.state.toError)}
+                  value={this.state.to}
+                  onChange={this.handleChangeForm("to")}
                 />
 
                 <TextField
@@ -152,7 +157,7 @@ class Send extends Component {
 
                 <TextField
                   id="wallet-password"
-                  label="Recipient"
+                  label="Password"
                   InputProps={inputProps}
                   InputLabelProps={inputLabelProps}
                   placeholder="Wallet password"

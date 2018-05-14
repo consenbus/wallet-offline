@@ -6,28 +6,30 @@ import Header from "./_Header";
 
 class Scan extends Component {
   state = {
+    error: null,
     success: false,
     delay: 300,
     result: "No result"
   };
 
-  handleScan(data) {
+  handleScan = data => {
     if (data) {
-      const i = data.indexOf("xrb_");
+      const i = data.indexOf("bus_");
       this.setState({
         result: data,
         success: i !== -1
       });
     }
-  }
+  };
 
-  handleError(err) {
+  handleError = err => {
     console.error(err);
-  }
+  };
 
   render() {
-    if (this.state.success) {
-      return <Redirect to={`/accounts/${this.state.result}`} />;
+    const { result, success, error } = this.state;
+    if (success) {
+      return <Redirect to={`/tab/send?to=${result}`} />;
     }
 
     return (
@@ -38,11 +40,13 @@ class Scan extends Component {
           <div>
             <QrReader
               delay={this.state.delay}
-              onError={this.handleError.bind(this)}
-              onScan={this.handleScan.bind(this)}
+              onError={this.handleError}
+              onScan={this.handleScan}
+              style={{ width: "75%", margin: "auto" }}
             />
           </div>
-          <p>{this.state.result}</p>
+          {error && <p>{error.message}</p>}
+          <p>{result}</p>
         </div>
       </Layout>
     );

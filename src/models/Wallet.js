@@ -5,7 +5,7 @@ import _once from "lodash/once";
 import ConsenbusWalletCore from "consenbus-wallet-core";
 import rpc from "../utils/rpc";
 import store from "../utils/store";
-import pow from "../utils/wallet/pow";
+import pow from "../utils/pow";
 import converter from "../utils/converter";
 
 const {

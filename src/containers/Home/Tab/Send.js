@@ -1,63 +1,50 @@
-import React, { Component } from 'react';
-import { observer, inject } from 'mobx-react';
-import { Redirect } from 'react-router-dom';
-import _isEmpty from 'lodash/isEmpty';
-import { withStyles } from 'material-ui/styles';
-import TextField from 'material-ui/TextField';
+import React, { Component } from "react";
+import { observer, inject } from "mobx-react";
+import { Redirect } from "react-router-dom";
+import _isEmpty from "lodash/isEmpty";
+import { withStyles } from "material-ui/styles";
+import TextField from "material-ui/TextField";
 // import MenuItem from "material-ui/Menu/MenuItem";
-import { MenuItem } from 'material-ui/Menu';
-import Card, { CardActions, CardContent } from 'material-ui/Card';
-import { CircularProgress } from 'material-ui/Progress';
-import Button from 'material-ui/Button';
-import Layout from '../_Layout';
-import Header from './_Header';
-import styles from '../../../styles/form';
-
-const units = [
-  { label: 'GBUS', value: 'GBUS' },
-  { label: 'MBUS', value: 'MBUS' },
-  { label: 'kBUS', value: 'kBUS' },
-  { label: 'BUS', value: 'BUS' },
-  { label: 'mBUS', value: 'mBUS' },
-  { label: 'uBUS', value: 'uBUS' },
-  { label: 'nBUS', value: 'nBUS' },
-];
+import Card, { CardActions, CardContent } from "material-ui/Card";
+import { CircularProgress } from "material-ui/Progress";
+import Button from "material-ui/Button";
+import Layout from "../_Layout";
+import Header from "./_Header";
+import styles from "../../../styles/form";
 
 class Send extends Component {
   state = {
-    account: '',
-    accountError: '',
-    amount: '',
-    amountError: '',
-    unit: 'BUS',
-    password: '',
-    passwordError: '',
+    account: "",
+    accountError: "",
+    amount: "",
+    amountError: "",
+    unit: "BUS",
+    password: "",
+    passwordError: "",
     loading: false,
-    success: false,
+    success: false
   };
 
-  handleChangeForm = name => (event) => {
+  handleChangeForm = name => event => {
     this.setState({
       [name]: event.target.value,
-      [`${name}Error`]: '',
+      [`${name}Error`]: ""
     });
   };
 
-  handleSend = async (e) => {
+  handleSend = async e => {
     e.preventDefault();
-    if (this.state.account === '') {
-      this.setState({ accountError: 'Recipient address must not be blank.' });
+    if (this.state.account === "") {
+      this.setState({ accountError: "Recipient address must not be blank." });
       return;
     }
 
-    if (this.state.amount === '') {
-      this.setState({ amountError: 'Amount must not be blank.' });
+    if (this.state.amount === "") {
+      this.setState({ amountError: "Amount must not be blank." });
       return;
     }
 
-    const {
-      amount, unit, password, account: toAccountAddress,
-    } = this.state;
+    const { amount, unit, password, account: toAccountAddress } = this.state;
     const { wallet } = this.props;
 
     this.setState({ loading: true });
@@ -70,22 +57,25 @@ class Send extends Component {
 
     this.setState({
       success: true,
-      loading: false,
+      loading: false
     });
   };
 
   render() {
-    const { classes, wallet: { accounts, currentIndex } } = this.props;
+    const {
+      classes,
+      wallet: { accounts, currentIndex }
+    } = this.props;
     const inputProps = {
       disableUnderline: true,
       classes: {
         root: classes.textFieldRoot,
-        input: classes.textFieldInput,
-      },
+        input: classes.textFieldInput
+      }
     };
     const inputLabelProps = {
       shrink: true,
-      className: classes.textFieldFormLabel,
+      className: classes.textFieldFormLabel
     };
     const { loading, success } = this.state;
     const [address] = accounts[currentIndex];
@@ -115,7 +105,7 @@ class Send extends Component {
                   margin="normal"
                   InputProps={{
                     disableUnderline: true,
-                    className: classes.textFieldUnit,
+                    className: classes.textFieldUnit
                   }}
                 />
 
@@ -130,7 +120,7 @@ class Send extends Component {
                   helperText={this.state.accountError}
                   error={!_isEmpty(this.state.accountError)}
                   value={this.state.account}
-                  onChange={this.handleChangeForm('account')}
+                  onChange={this.handleChangeForm("account")}
                 />
 
                 <TextField
@@ -144,29 +134,21 @@ class Send extends Component {
                   helperText={this.state.amountError}
                   error={!_isEmpty(this.state.amountError)}
                   value={this.state.amount}
-                  onChange={this.handleChangeForm('amount')}
+                  onChange={this.handleChangeForm("amount")}
                 />
 
                 <TextField
                   id="select-unit"
-                  select
                   label="Unit"
                   value={this.state.unit}
-                  onChange={this.handleChangeForm('unit')}
                   helperText=""
                   margin="normal"
                   InputProps={{
                     disableUnderline: true,
-                    className: classes.textFieldUnit,
+                    className: classes.textFieldUnit
                   }}
                   InputLabelProps={inputLabelProps}
-                >
-                  {units.map(option => (
-                    <MenuItem key={option.value} value={option.value}>
-                      {option.label}
-                    </MenuItem>
-                  ))}
-                </TextField>
+                />
 
                 <TextField
                   id="wallet-password"
@@ -180,7 +162,7 @@ class Send extends Component {
                   helperText={this.state.passwordError}
                   error={!_isEmpty(this.state.passwordError)}
                   value={this.state.password}
-                  onChange={this.handleChangeForm('password')}
+                  onChange={this.handleChangeForm("password")}
                 />
               </form>
             </CardContent>
@@ -191,15 +173,20 @@ class Send extends Component {
                   color="secondary"
                   fullWidth
                   style={{
-                    margin: '0 12px 20px 12px',
-                    color: 'white',
+                    margin: "0 12px 20px 12px",
+                    color: "white"
                   }}
                   disabled={loading}
                   onClick={this.handleSend}
                 >
                   Send
                 </Button>
-                {loading && <CircularProgress size={24} className={classes.buttonProgress} />}
+                {loading && (
+                  <CircularProgress
+                    size={24}
+                    className={classes.buttonProgress}
+                  />
+                )}
               </div>
             </CardActions>
           </Card>
@@ -209,4 +196,4 @@ class Send extends Component {
   }
 }
 
-export default withStyles(styles)(inject('wallet')(observer(Send)));
+export default withStyles(styles)(inject("wallet")(observer(Send)));

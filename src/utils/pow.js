@@ -88,6 +88,7 @@ const createTask = hash => {
 };
 
 const get = async hash => {
+  if (!hash) return null;
   if (dict[hash]) {
     const work = dict[hash];
     if (work.state === "done") return work.work;

@@ -156,6 +156,19 @@ class Send extends Component {
                 />
 
                 <TextField
+                  id="trade-fee"
+                  label="Received(fee 0.01 BUS)"
+                  value={+this.state.amount - 0.01}
+                  helperText=""
+                  margin="normal"
+                  style={{ width: "250px" }}
+                  InputProps={{
+                    disableUnderline: true,
+                    className: classes.textFieldUnit
+                  }}
+                />
+
+                <TextField
                   id="wallet-password"
                   label="Password"
                   InputProps={inputProps}

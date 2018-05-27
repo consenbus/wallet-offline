@@ -1,9 +1,10 @@
-import axios from 'axios';
-import retry from 'async/retry';
+import axios from "axios";
+import retry from "async/retry";
 
 let enabledBaseURLIndex = 0;
 const baseURLs = [
-  'http://node-test.consenbus.org:55000',
+  "http://127.0.0.1:55000"
+  // 'http://node-test.consenbus.org:55000',
 ];
 
 /* production
@@ -20,28 +21,32 @@ const post = (uri, body) => {
   const { length } = baseURLs;
   let baseURLIndex = enabledBaseURLIndex;
   return new Promise((resolve, reject) => {
-    retry(length, (callback) => {
-      const root = baseURLs[baseURLIndex % length];
-      const url = `${root}${uri}`;
-      axios
-        .post(url, body)
-        .then((resp) => {
-          enabledBaseURLIndex = baseURLIndex;
-          callback(null, resp);
-        })
-        .catch((error) => {
-          baseURLIndex += 1;
-          callback(error);
-        });
-    }, (error, resp) => {
-      if (error) {
-        if (error.response) {
-          return resolve(error.response);
+    retry(
+      length,
+      callback => {
+        const root = baseURLs[baseURLIndex % length];
+        const url = `${root}${uri}`;
+        axios
+          .post(url, body)
+          .then(resp => {
+            enabledBaseURLIndex = baseURLIndex;
+            callback(null, resp);
+          })
+          .catch(error => {
+            baseURLIndex += 1;
+            callback(error);
+          });
+      },
+      (error, resp) => {
+        if (error) {
+          if (error.response) {
+            return resolve(error.response);
+          }
+          return reject(error);
         }
-        return reject(error);
+        return resolve(resp);
       }
-      return resolve(resp);
-    });
+    );
   });
 };
 

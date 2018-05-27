@@ -63,8 +63,24 @@ const getTableData = block => {
       "Destination",
       <Link to={`/explorer/accounts/${destination}`}>{destination}</Link>
     ]);
-  if (amount)
-    data.push(["Amount", `${converter.unit(amount || 0, "raw", "BUS")} BUS`]);
+  if (amount) {
+    if (type === "send") {
+      data.push(["Amount", `${converter.unit(amount || 0, "raw", "BUS")} BUS`]);
+    } else {
+      data.push([
+        "Amount",
+        `${converter.unit(amount || 0, "raw", "BUS") - 0.01} BUS`
+      ]);
+    }
+  }
+
+  if (type === "receive" || type === "open")
+    data.push(["Sent", `${converter.unit(amount || 0, "raw", "BUS")} BUS`]);
+  if (type === "send")
+    data.push([
+      "Received",
+      `${converter.unit(amount || 0, "raw", "BUS") - 0.01} BUS`
+    ]);
   if (source)
     data.push([
       "Source",

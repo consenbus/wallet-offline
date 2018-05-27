@@ -11,6 +11,9 @@ import Button from "material-ui/Button";
 import Layout from "../_Layout";
 import Header from "./_Header";
 import styles from "../../../styles/form";
+import converter from "../../../utils/converter";
+
+const { unit, minusFee } = converter;
 
 class Send extends Component {
   state = {
@@ -18,7 +21,6 @@ class Send extends Component {
     toError: "",
     amount: "0.01",
     amountError: "",
-    unit: "BUS",
     password: "",
     passwordError: "",
     loading: false,
@@ -41,7 +43,7 @@ class Send extends Component {
     e.preventDefault();
 
     const { wallet } = this.props;
-    const { amount, unit, password, to } = this.state;
+    const { amount, password, to } = this.state;
     if (to === "") {
       this.setState({ toError: "Recipient address must not be blank." });
       return;
@@ -59,7 +61,7 @@ class Send extends Component {
 
     this.setState({ loading: true });
     try {
-      await wallet.send(amount, unit, to, password);
+      await wallet.send(amount, "BUS", to, password);
     } catch (error) {
       this.setState({ passwordError: error.message, loading: false });
       return;
@@ -150,7 +152,7 @@ class Send extends Component {
                 <TextField
                   id="select-unit"
                   label="Unit"
-                  value={this.state.unit}
+                  value="BUS"
                   helperText=""
                   margin="normal"
                   InputProps={{
@@ -163,7 +165,7 @@ class Send extends Component {
                 <TextField
                   id="trade-fee"
                   label="Received(fee 0.01 BUS)"
-                  value={+this.state.amount - 0.01}
+                  value={minusFee(unit(this.state.amount, "BUS", "raw"))}
                   helperText=""
                   margin="normal"
                   style={{ width: "250px" }}

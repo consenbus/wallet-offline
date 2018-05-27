@@ -67,20 +67,14 @@ const getTableData = block => {
     if (type === "send") {
       data.push(["Amount", `${converter.unit(amount || 0, "raw", "BUS")} BUS`]);
     } else {
-      data.push([
-        "Amount",
-        `${converter.unit(amount || 0, "raw", "BUS") - 0.01} BUS`
-      ]);
+      data.push(["Amount", `${converter.minusFee(amount)} BUS`]);
     }
   }
 
   if (type === "receive" || type === "open")
     data.push(["Sent", `${converter.unit(amount || 0, "raw", "BUS")} BUS`]);
   if (type === "send")
-    data.push([
-      "Received",
-      `${converter.unit(amount || 0, "raw", "BUS") - 0.01} BUS`
-    ]);
+    data.push(["Received", `${converter.minusFee(amount)} BUS`]);
   if (source)
     data.push([
       "Source",

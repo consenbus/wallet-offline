@@ -16,7 +16,7 @@ class Send extends Component {
   state = {
     to: "",
     toError: "",
-    amount: "",
+    amount: "0.01",
     amountError: "",
     unit: "BUS",
     password: "",
@@ -49,6 +49,11 @@ class Send extends Component {
 
     if (amount === "") {
       this.setState({ amountError: "Amount must not be blank." });
+      return;
+    }
+
+    if (+amount <= 0.01) {
+      this.setState({ amountError: "Amount must great then 0.01." });
       return;
     }
 

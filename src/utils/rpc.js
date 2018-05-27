@@ -2,10 +2,7 @@ import axios from "axios";
 import retry from "async/retry";
 
 let enabledBaseURLIndex = 0;
-const baseURLs = [
-  "http://127.0.0.1:55000"
-  // 'http://node-test.consenbus.org:55000',
-];
+const baseURLs = ["http://node-test.consenbus.org:55000"];
 
 /* production
 const baseURLs = [

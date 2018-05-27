@@ -13,6 +13,7 @@ const units = {
 };
 
 const fee = BigNumber("1e25");
+const rate = BigNumber("0.2");
 
 const converter = {
   unit(
@@ -39,8 +40,14 @@ const converter = {
     return new BigNumber(base).plus(new BigNumber(plus)).toFixed(0);
   },
   minusFee(base /* : string */) {
-    return new BigNumber(base)
+    return new BigNumber(base || "0")
       .minus(fee)
+      .dividedBy(units.BUS)
+      .toFixed(6);
+  },
+  dollar(base /* : string */) {
+    return new BigNumber(base || "0")
+      .multipliedBy(rate)
       .dividedBy(units.BUS)
       .toFixed(6);
   }

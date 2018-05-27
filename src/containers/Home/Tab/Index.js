@@ -52,6 +52,12 @@ class Index extends Component {
           </Typography>
           <Typography variant="subheading" color="inherit">
             <span className="ellipsis">
+              ≈ <b>$</b>{" "}
+              {converter.unit(currentInfo.balance || 0, "raw", "BUS") * 0.2}
+            </span>
+          </Typography>
+          <Typography variant="subheading" color="inherit">
+            <span className="ellipsis">
               <span>Address_{currentIndex + 1}: </span>
               {address}
             </span>

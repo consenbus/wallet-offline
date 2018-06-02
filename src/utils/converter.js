@@ -45,6 +45,12 @@ const converter = {
       .dividedBy(units.BUS)
       .toFixed(6);
   },
+  plusFee(base /* : string */) {
+    return new BigNumber(base || "0")
+      .plus(fee)
+      .dividedBy(units.BUS)
+      .toFixed(6);
+  },
   dollar(base /* : string */) {
     return new BigNumber(base || "0")
       .multipliedBy(rate)

@@ -54,8 +54,8 @@ class HistoryList extends Component {
                 primary={h.account}
                 secondary={
                   h.type !== "receive"
-                    ? `${converter.unit(h.amount || 0, "raw", "BUS")} BUS`
-                    : `${converter.minusFee(h.amount)} BUS`
+                    ? `${converter.plusFee(h.amount)} BUS`
+                    : `${converter.unit(h.amount || 0, "raw", "BUS")} BUS`
                 }
               />
             </span>

@@ -65,16 +65,16 @@ const getTableData = block => {
     ]);
   if (amount) {
     if (type === "send") {
-      data.push(["Amount", `${converter.unit(amount || 0, "raw", "BUS")} BUS`]);
+      data.push(["Sent", `${converter.plusFee(amount)} BUS`]);
     } else {
-      data.push(["Amount", `${converter.minusFee(amount)} BUS`]);
+      data.push(["Received", `${converter.unit(amount, "raw", "BUS")} BUS`]);
     }
   }
 
   if (type === "receive" || type === "open")
-    data.push(["Sent", `${converter.unit(amount || 0, "raw", "BUS")} BUS`]);
+    data.push(["Sent", `${converter.plusFee(amount)} BUS`]);
   if (type === "send")
-    data.push(["Received", `${converter.minusFee(amount)} BUS`]);
+    data.push(["Received", `${converter.unit(amount, "raw", "BUS")} BUS`]);
   if (source)
     data.push([
       "Source",

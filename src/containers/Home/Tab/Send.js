@@ -63,7 +63,8 @@ class Send extends Component {
     try {
       await wallet.send(amount, "BUS", to, password);
     } catch (error) {
-      this.setState({ passwordError: error.message, loading: false });
+      const { field = "password" } = error;
+      this.setState({ [`${field}Error`]: error.message, loading: false });
       return;
     }
 
@@ -165,7 +166,7 @@ class Send extends Component {
                 <TextField
                   id="trade-fee"
                   label="Received(fee 0.01 BUS)"
-                  value={minusFee(unit(this.state.amount, "BUS", "raw"))}
+                  value={minusFee(unit(this.state.amount || 0, "BUS", "raw"))}
                   helperText=""
                   margin="normal"
                   style={{ width: "250px" }}

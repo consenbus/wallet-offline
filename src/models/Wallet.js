@@ -145,6 +145,9 @@ async function send(amount, unit, toAccountAddress, password) {
   // and balance
   const info = await pullAccountInfo(currentIndex);
 
+  // verify rawAmount lte info.balance
+  const balance = converter.sentBalance(info.balance, rawAmount);
+
   // Step 3. Generate Proof of Work from your account's frontier
   const work = await pow(info.frontier);
 
@@ -153,10 +156,7 @@ async function send(amount, unit, toAccountAddress, password) {
     type: "send",
     previous: info.frontier,
     destination: publicKeyFromAddress(toAccountAddress),
-    balance: dec2hex(
-      converter.minus(info.balance, rawAmount),
-      16
-    ).toUpperCase(),
+    balance: dec2hex(balance, 16).toUpperCase(),
     work
   };
 

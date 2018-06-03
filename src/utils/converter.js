@@ -45,6 +45,16 @@ const converter = {
       .dividedBy(units.BUS)
       .toFixed(6);
   },
+  sentBalance(base /* : string */, rawAmount /* : string */) {
+    const _base = new BigNumber(base);
+    const amount = new BigNumber(rawAmount);
+    if (amount.gt(_base)) {
+      const error = new Error("Overspend");
+      error.field = "amount";
+      throw error;
+    }
+    return _base.minus(amount).toFixed(0);
+  },
   plusFee(base /* : string */) {
     return new BigNumber(base || "0")
       .plus(fee)

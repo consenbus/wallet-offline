@@ -26,12 +26,27 @@ const styles = {
   name: {
     color: "#f6f6f6",
     fontSize: "20px"
+  },
+  error: {
+    border: "1px solid #ffa39e",
+    backgroundColor: "#fff1f0",
+    padding: "5px",
+    margin: "10px"
   }
 };
 
 class HistoryList extends Component {
   render() {
     const { list, classes } = this.props;
+
+    if (!list.length) {
+      return (
+        <div className={classes.error}>
+          The account is not activated, and will be activated when a successful
+          transfer is received.
+        </div>
+      );
+    }
     return (
       <List>
         {_map(list, h => (

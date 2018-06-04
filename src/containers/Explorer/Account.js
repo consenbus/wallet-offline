@@ -79,20 +79,27 @@ class Account extends React.Component {
       });
 
       if (info.error) {
-        this.setState({
-          infoError: new Error(info.error),
-          infoLoading: false
-        });
+        if (info.error === "Account not found") {
+          this.setState({
+            account: {
+              account,
+              balance: "0",
+              block_count: 0
+            },
+            infoError: null,
+            infoLoading: false
+          });
+        } else {
+          this.setState({
+            infoError: new Error(info.error),
+            infoLoading: false
+          });
+        }
         return;
       }
 
       this.setState({
-        account: Object.assign(
-          {
-            account
-          },
-          info
-        ),
+        account: Object.assign({ account }, info),
         infoError: null,
         infoLoading: false
       });

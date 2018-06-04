@@ -406,6 +406,7 @@ function clearTempData() {
     store.setItem(`history_${index}`, "");
     store.setItem(`accountInfo_${index}`, "");
   });
+  store.setItem("wallet-works", "");
   store.setItem("currentIndex", 0);
 }
 

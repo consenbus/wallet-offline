@@ -28,6 +28,9 @@ const styles = {
   }
 };
 
+const genesis =
+  "BCB7AD11BD179262EFBCD42F449F6B14F8B0939F65CED4AA301EF3225B8C6D06";
+
 const getTableData = block => {
   if (_isEmpty(block)) {
     return [];
@@ -71,15 +74,24 @@ const getTableData = block => {
     }
   }
 
-  if (type === "receive" || type === "open")
-    data.push(["Sent", `${converter.plusFee(amount)} BUS`]);
-  if (type === "send")
+  if (type === "receive" || type === "open") {
+    if (source !== genesis) {
+      data.push(["Sent", `${converter.plusFee(amount)} BUS`]);
+      data.push(["Fee", "0.01 BUS"]);
+    }
+  }
+  if (type === "send") {
     data.push(["Received", `${converter.unit(amount, "raw", "BUS")} BUS`]);
-  if (source)
+    data.push(["Fee", "0.01 BUS"]);
+  }
+  if (source !== genesis) {
     data.push([
       "Source",
       <Link to={`/explorer/blocks/${source}`}>{source}</Link>
     ]);
+  } else {
+    data.push(["Source", source]);
+  }
   if (previous)
     data.push([
       "Previous",

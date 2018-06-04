@@ -84,13 +84,15 @@ const getTableData = block => {
     data.push(["Received", `${converter.unit(amount, "raw", "BUS")} BUS`]);
     data.push(["Fee", "0.01 BUS"]);
   }
-  if (source !== genesis) {
-    data.push([
-      "Source",
-      <Link to={`/explorer/blocks/${source}`}>{source}</Link>
-    ]);
-  } else {
-    data.push(["Source", source]);
+  if (source) {
+    if (source !== genesis) {
+      data.push([
+        "Source",
+        <Link to={`/explorer/blocks/${source}`}>{source}</Link>
+      ]);
+    } else {
+      data.push(["Source", source]);
+    }
   }
   if (previous)
     data.push([

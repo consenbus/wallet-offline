@@ -32,6 +32,13 @@ class Send extends Component {
     if (to && to.startsWith("bus_")) this.setState({ to });
   }
 
+  formatAmount = event => {
+    this.setState({
+      amount: converter.unit(event.target.value, "BUS", "BUS"),
+      amountError: ""
+    });
+  };
+
   handleChangeForm = name => event => {
     this.setState({
       [name]: event.target.value,
@@ -147,6 +154,7 @@ class Send extends Component {
                   helperText={this.state.amountError}
                   error={!_isEmpty(this.state.amountError)}
                   value={this.state.amount}
+                  onBlur={this.formatAmount}
                   onChange={this.handleChangeForm("amount")}
                 />
 

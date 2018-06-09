@@ -8,10 +8,25 @@
  */
 
 /* eslint-disable no-undef */
+import blake from "blakejs";
+import ConsenbusWalletCore from "consenbus-wallet-core";
 import store from "./store";
-import "./webgl-pow";
 
 const dict = {};
+const {
+  fns: { hex_uint8 }
+} = ConsenbusWalletCore;
+
+const t = hex_uint8("ffffc00000000000");
+const check = (hash, work) => {
+  const context = blake.blake2bInit(8, null);
+  blake.blake2bUpdate(context, hex_uint8(work).reverse());
+  blake.blake2bUpdate(context, hex_uint8(hash));
+  const res = blake.blake2bFinal(context).reverse();
+
+  if (res[0] === t[0]) if (res[1] === t[1]) if (res[3] >= t[3]) return true;
+  return false;
+};
 
 const storeKey = "wallet-works";
 
@@ -32,6 +47,8 @@ const restore = () => {
   store.getItem(storeKey).then(works => {
     if (!works) return;
     works.forEach(([hash, work, completed]) => {
+      // ignore error work
+      if (!check(hash, work)) return;
       // ignore too old item
       if (now - completed > expired) return;
       dict[hash] = {
@@ -47,30 +64,44 @@ const restore = () => {
   });
 };
 
+const NUM_THREADS = NaN;
+
 const createTask = hash => {
   const work = { state: "pending", spent_MS: 0 };
   dict[hash] = work;
-  const promise = new Promise(resolve => {
-    const start = Date.now();
-    ConsenbusWebglPow(hash, data => {
-      work.state = "done";
-      work.work = data;
-      work.completed = Date.now();
-      work.spent_MS = Date.now() - start;
+  const promise = new Promise((resolve, reject) => {
+    let start = 0;
+    const workers = pow_initiate(NUM_THREADS, "/js/pow-wasm/");
+    pow_callback(
+      workers,
+      hash,
+      () => {
+        start = Date.now();
+        console.log("Pow calc hash is: %s, startedAt: %d", hash, start);
+      },
+      data => {
+        if (!check(hash, data)) {
+          return reject(Error("Click to recalc work, please"));
+        }
+        work.state = "done";
+        work.work = data;
+        work.completed = Date.now();
+        work.spent_MS = Date.now() - start;
 
-      console.log(
-        "Pow calc hash is: %s, work is: %s, spent_MS: %d, started: %d, completed: %d",
-        hash,
-        data,
-        work.spent_MS,
-        start,
-        Date.now()
-      );
-      resolve(data);
+        console.log(
+          "Pow calc hash is: %s, work is: %s, spent_MS: %d, started: %d, completed: %d",
+          hash,
+          data,
+          work.spent_MS,
+          start,
+          Date.now()
+        );
+        resolve(data);
 
-      // write into localStorage for quick to get
-      setTimeout(backup2Storage, 10);
-    });
+        // write into localStorage for quick to get
+        return setTimeout(backup2Storage, 10);
+      }
+    );
   });
   work.promise = promise;
 

@@ -4,7 +4,7 @@ var pow_initiate = function(threads, worker_path) {
   }
   var hardwareConcurrency = self.navigator.hardwareConcurrency | 0;
   if (isNaN(threads)) {
-    threads = Math.max(1, self.navigator.hardwareConcurrency - 1);
+    threads = Math.max(1, hardwareConcurrency - 1);
   }
   var workers = [];
   for (let i = 0; i < threads; i++) {

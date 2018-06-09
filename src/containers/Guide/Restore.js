@@ -1,24 +1,24 @@
-import React, { Component } from 'react';
-import { Link, Redirect } from 'react-router-dom';
-import { observer, inject } from 'mobx-react';
-import _isEmpty from 'lodash/isEmpty';
-import _isString from 'lodash/isString';
-import _every from 'lodash/every';
-import { withStyles } from 'material-ui/styles';
-import IconButton from 'material-ui/IconButton';
-import TextField from 'material-ui/TextField';
-import Button from 'material-ui/Button';
-import teal from 'material-ui/colors/teal';
-import LeftIcon from 'material-ui-icons/KeyboardArrowLeft';
-import { MenuItem } from 'material-ui/Menu';
-import Select from 'material-ui/Select';
+import React, { Component } from "react";
+import { Link, Redirect } from "react-router-dom";
+import { observer, inject } from "mobx-react";
+import _isEmpty from "lodash/isEmpty";
+import _isString from "lodash/isString";
+import _every from "lodash/every";
+import { withStyles } from "material-ui/styles";
+import IconButton from "material-ui/IconButton";
+import TextField from "material-ui/TextField";
+import Button from "material-ui/Button";
+import teal from "material-ui/colors/teal";
+import LeftIcon from "material-ui-icons/KeyboardArrowLeft";
+import { MenuItem } from "material-ui/Menu";
+import Select from "material-ui/Select";
 
-import Layout from './_Layout';
+import Layout from "./_Layout";
 
 const styles = theme => ({
   container: {
-    display: 'flex',
-    flexWrap: 'wrap',
+    display: "flex",
+    flexWrap: "wrap"
   },
   textField: {
     // marginLeft: theme.spacing.unit,
@@ -26,87 +26,87 @@ const styles = theme => ({
     // width: 200
   },
   menu: {
-    width: 200,
+    width: 200
   },
   textFieldRoot: {
     padding: 0,
-    'label + &': {
-      marginTop: theme.spacing.unit * 3,
-    },
+    "label + &": {
+      marginTop: theme.spacing.unit * 3
+    }
   },
   textFieldInput: {
     backgroundColor: theme.palette.common.white,
-    border: '1px solid #ced4da',
-    padding: '10px 5px',
-    transition: theme.transitions.create(['border-color', 'box-shadow']),
-    '&:focus': {
-      borderColor: '#80bdff',
-      boxShadow: '0 0 0 0.2rem rgba(0,123,255,.25)',
-    },
+    border: "1px solid #ced4da",
+    padding: "10px 5px",
+    transition: theme.transitions.create(["border-color", "box-shadow"]),
+    "&:focus": {
+      borderColor: "#80bdff",
+      boxShadow: "0 0 0 0.2rem rgba(0,123,255,.25)"
+    }
   },
   textFieldFormLabel: {
     color: theme.palette.common.white,
-    fontSize: 18,
-  },
+    fontSize: 18
+  }
 });
 
 const langs = {
-  zh: '简体中文',
-  cht: '繁体中文',
-  en: 'English',
-  jp: '日本語',
-  kor: '한국어',
-  fra: 'Français',
-  spa: 'El español',
-  it: 'In Italiano',
+  zh: "简体中文",
+  cht: "繁体中文",
+  en: "English",
+  jp: "日本語",
+  kor: "한국어",
+  fra: "Français",
+  spa: "El español",
+  it: "In Italiano"
 };
-const hex = new Set('0123456789abcdefABCDEF'.split(''));
+const hex = new Set("0123456789abcdefABCDEF".split(""));
 
 class Restore extends Component {
   static isSeed(value) {
-    if (!_isString(value)) throw Error('Mnemonic/Seed must be a string.');
-    return value.length === 64 && _every(value.split(''), x => hex.has(x));
+    if (!_isString(value)) throw Error("Mnemonic/Seed must be a string.");
+    return value.length === 64 && _every(value.split(""), x => hex.has(x));
   }
 
   state = {
-    language: 'en',
+    language: "en",
     success: false,
-    name: '',
-    nameError: '',
-    value: '',
-    valueError: '',
-    password: '',
-    passwordError: '',
-    confirmPassword: '',
-    confirmPasswordError: '',
+    name: "",
+    nameError: "",
+    value: "",
+    valueError: "",
+    password: "",
+    passwordError: "",
+    confirmPassword: "",
+    confirmPasswordError: ""
   };
 
-  handleChange = name => (event) => {
+  handleChange = name => event => {
     this.setState({
       [name]: event.target.value,
-      [`${name}Error`]: '',
+      [`${name}Error`]: ""
     });
-  }
+  };
 
-  handleRestore = (e) => {
+  handleRestore = e => {
     e.preventDefault();
-    const {
-      name, password, confirmPassword, value, language,
-    } = this.state;
+    const { name, password, confirmPassword, value, language } = this.state;
     const { wallet } = this.props;
 
-    if (name === '') {
-      this.setState({ nameError: 'Name must not be blank.' });
+    if (name === "") {
+      this.setState({ nameError: "Name must not be blank." });
       return;
     }
 
-    if (value === '') {
-      this.setState({ valueError: 'Mnemonic/Seed must not be blank.' });
+    if (value === "") {
+      this.setState({ valueError: "Mnemonic/Seed must not be blank." });
       return;
     }
 
     if (password !== confirmPassword) {
-      this.setState({ confirmPasswordError: 'Confirm password must be same the password.' });
+      this.setState({
+        confirmPasswordError: "Confirm password must be same the password."
+      });
       return;
     }
 
@@ -136,18 +136,18 @@ class Restore extends Component {
       disableUnderline: true,
       classes: {
         root: classes.textFieldRoot,
-        input: classes.textFieldInput,
-      },
+        input: classes.textFieldInput
+      }
     };
 
     const inputLabelProps = {
       shrink: true,
-      className: classes.textFieldFormLabel,
+      className: classes.textFieldFormLabel
     };
 
     return (
       <Layout>
-        <p style={{ textAlign: 'left' }}>
+        <p style={{ textAlign: "left" }}>
           <IconButton color="inherit" component={Link} to="/guide">
             <LeftIcon />
           </IconButton>
@@ -170,7 +170,7 @@ class Restore extends Component {
             margin="normal"
             helperText={this.state.nameError}
             error={!_isEmpty(this.state.nameError)}
-            onChange={this.handleChange('name')}
+            onChange={this.handleChange("name")}
             value={this.state.name}
           />
 
@@ -185,7 +185,7 @@ class Restore extends Component {
             value={this.state.password}
             margin="normal"
             error={!_isEmpty(this.state.passwordError)}
-            onChange={this.handleChange('password')}
+            onChange={this.handleChange("password")}
           />
 
           <TextField
@@ -199,7 +199,7 @@ class Restore extends Component {
             value={this.state.confirmPassword}
             margin="normal"
             error={!_isEmpty(this.state.confirmPasswordError)}
-            onChange={this.handleChange('confirmPassword')}
+            onChange={this.handleChange("confirmPassword")}
           />
 
           <TextField
@@ -211,35 +211,37 @@ class Restore extends Component {
             margin="normal"
             helperText={this.state.valueError}
             error={!_isEmpty(this.state.valueError)}
-            onChange={this.handleChange('value')}
+            onChange={this.handleChange("value")}
             value={this.state.value}
           />
-          {this.state.value && !Restore.isSeed(this.state.value) && (
-            <Select
-              value={this.state.language}
-              onChange={this.handleChange('language')}
-              inputProps={{
-                name: 'language',
-                id: 'language-simple',
-              }}
-            >
-              {wallet.languages().map(x => (
-                <MenuItem key={x} value={x}>{langs[x]}</MenuItem>
-              ))}
-            </Select>
-          )}
-
+          {this.state.value &&
+            !Restore.isSeed(this.state.value) && (
+              <Select
+                value={this.state.language}
+                onChange={this.handleChange("language")}
+                inputProps={{
+                  name: "language",
+                  id: "language-simple"
+                }}
+              >
+                {wallet.languages().map(x => (
+                  <MenuItem key={x} value={x}>
+                    {langs[x]}
+                  </MenuItem>
+                ))}
+              </Select>
+            )}
         </form>
 
-        <div style={{ marginTop: '1rem' }}>
+        <div style={{ marginTop: "1rem" }}>
           <Button
             variant="raised"
             color="secondary"
             size="large"
             fullWidth
             style={{
-              color: 'white',
-              backgroundColor: teal.A700,
+              color: "white",
+              backgroundColor: teal.A700
             }}
             onClick={this.handleRestore}
           >
@@ -251,4 +253,4 @@ class Restore extends Component {
   }
 }
 
-export default withStyles(styles)(inject('wallet')(observer(Restore)));
+export default withStyles(styles)(inject("wallet")(observer(Restore)));

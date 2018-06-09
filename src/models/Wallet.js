@@ -27,6 +27,8 @@ extendObservable(wallet, {
   error: null,
   name: null,
   accounts: [], // accounts [[address, publicKey], ...]
+  accountLoading: false, // account info load status
+  historyLoading: false, // account history load status
   currentIndex: 0, // current Index max value is 10
   currentBalance: 0, // balance of current selected account
   currentInfo: {}, // current account info
@@ -44,12 +46,14 @@ function writer(encrypted) {
 
 async function pullAccountInfo(index) {
   const { accounts, currentIndex } = wallet;
+  wallet.accountLoading = true;
   if (accounts.length === 0) return {};
   const [address, publicKey] = accounts[index];
   const { data } = await rpc.post("/", {
     action: "account_info",
     account: address
   });
+  wallet.accountLoading = false;
   if (!data.error) {
     // update current account
     if (currentIndex === index) wallet.currentInfo = data;
@@ -65,12 +69,14 @@ async function pullAccountInfo(index) {
 async function pullHistoryList(index) {
   const { accounts, currentIndex } = wallet;
   if (accounts.length === 0) return;
+  wallet.historyLoading = true;
   const [address] = accounts[index];
   const { data } = await rpc.post("/", {
     action: "account_history",
     account: address,
     count: 500
   });
+  wallet.historyLoading = false;
   if (Array.isArray(data.history)) {
     if (index === currentIndex) wallet.currentHistory = data.history;
     store.setItem(`history_${index}`, data.history);

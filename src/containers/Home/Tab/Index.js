@@ -3,6 +3,7 @@ import { observer, inject } from "mobx-react";
 import { withStyles } from "material-ui/styles";
 import Typography from "material-ui/Typography";
 import blue from "material-ui/colors/blue";
+import { LinearProgress } from "material-ui/Progress";
 
 import Layout from "../_Layout";
 import Header from "./_Header";
@@ -26,7 +27,9 @@ class Index extends Component {
       name,
       accounts,
       currentIndex,
+      accountLoading,
       currentInfo,
+      historyLoading,
       currentHistory
     } = wallet;
 
@@ -35,34 +38,38 @@ class Index extends Component {
     return (
       <Layout active="home">
         <Header title="Balance" />
-        <div
-          style={{
-            backgroundColor: blue.A700,
-            color: "white",
-            textAlign: "center",
-            paddingTop: "50px",
-            paddingBottom: "50px"
-          }}
-        >
-          <Typography variant="display1" color="inherit">
-            <span className={classes.name}>{name}</span>
-            <span className="ellipsis">
-              {converter.unit(currentInfo.balance || 0, "raw", "BUS")} BUS
-            </span>
-          </Typography>
-          <Typography variant="subheading" color="inherit">
-            <span className="ellipsis">
-              ≈ $ {converter.dollar(currentInfo.balance)}
-            </span>
-          </Typography>
-          <Typography variant="subheading" color="inherit">
-            <span className="ellipsis">
-              <span>Address_{currentIndex + 1}: </span>
-              {address}
-            </span>
-          </Typography>
-        </div>
-        <HistoryList list={currentHistory} />
+        {accountLoading && <LinearProgress />}
+        {!accountLoading && (
+          <div
+            style={{
+              backgroundColor: blue.A700,
+              color: "white",
+              textAlign: "center",
+              paddingTop: "50px",
+              paddingBottom: "50px"
+            }}
+          >
+            <Typography variant="display1" color="inherit">
+              <span className={classes.name}>{name}</span>
+              <span className="ellipsis">
+                {converter.unit(currentInfo.balance || 0, "raw", "BUS")} BUS
+              </span>
+            </Typography>
+            <Typography variant="subheading" color="inherit">
+              <span className="ellipsis">
+                ≈ $ {converter.dollar(currentInfo.balance)}
+              </span>
+            </Typography>
+            <Typography variant="subheading" color="inherit">
+              <span className="ellipsis">
+                <span>Address_{currentIndex + 1}: </span>
+                {address}
+              </span>
+            </Typography>
+          </div>
+        )}
+        {historyLoading && <LinearProgress />}
+        {!historyLoading && <HistoryList list={currentHistory} />}
       </Layout>
     );
   }

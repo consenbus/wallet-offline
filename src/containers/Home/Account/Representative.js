@@ -1,54 +1,54 @@
-import React, { Component } from 'react';
-import { observer, inject } from 'mobx-react';
-import { Link, Redirect } from 'react-router-dom';
-import { withStyles } from 'material-ui/styles';
-import TextField from 'material-ui/TextField';
-import Card, { CardActions, CardContent } from 'material-ui/Card';
-import LeftIcon from 'material-ui-icons/KeyboardArrowLeft';
-import Button from 'material-ui/Button';
-import _isEmpty from 'lodash/isEmpty';
-import Layout from '../_Layout';
-import Header from '../Tab/_Header';
-import styles from '../../../styles/form';
+import React, { Component } from "react";
+import { observer, inject } from "mobx-react";
+import { Link, Redirect } from "react-router-dom";
+import { withStyles } from "material-ui/styles";
+import TextField from "material-ui/TextField";
+import Card, { CardActions, CardContent } from "material-ui/Card";
+import LeftIcon from "material-ui-icons/KeyboardArrowLeft";
+import Button from "material-ui/Button";
+import _isEmpty from "lodash/isEmpty";
+import Layout from "../_Layout";
+import Header from "../Tab/_Header";
+import styles from "../../../styles/form";
 
 class Representative extends Component {
   state = {
     success: false,
-    password: '',
-    passwordError: '',
-    representative: '',
-    representativeError: '',
+    password: "",
+    passwordError: "",
+    representative: "",
+    representativeError: ""
   };
 
   componentWillMount() {
     const { wallet } = this.props;
-    wallet.getRepresentative().then((rep) => {
-      this.setState({ representative: rep || 'null' });
+    wallet.getRepresentative().then(rep => {
+      this.setState({ representative: rep || "null" });
     });
   }
 
-  handleChange = name => (event) => {
+  handleChange = name => event => {
     this.setState({
       [name]: event.target.value,
-      [`${name}Error`]: '',
+      [`${name}Error`]: ""
     });
   };
 
-  handleEditRepresentative = async (e) => {
+  handleEditRepresentative = async e => {
     e.preventDefault();
 
     const { wallet } = this.props;
     const { representative, password } = this.state;
-    if (representative === '') {
+    if (representative === "") {
       this.setState({
-        representativeError: 'Representative account must not be blank.',
+        representativeError: "Representative account must not be blank."
       });
       return;
     }
 
-    if (password === '') {
+    if (password === "") {
       this.setState({
-        passwordError: 'Password must not be blank.',
+        passwordError: "Password must not be blank."
       });
       return;
     }
@@ -73,30 +73,26 @@ class Representative extends Component {
       disableUnderline: true,
       classes: {
         root: classes.textFieldRoot,
-        input: classes.textFieldInput,
-      },
+        input: classes.textFieldInput
+      }
     };
     const inputLabelProps = {
       shrink: true,
-      className: classes.textFieldFormLabel,
+      className: classes.textFieldFormLabel
     };
 
     return (
       <Layout active="">
         <Header
           title="Edit representative"
-          link={`/accounts/${accountParam}/edit`}
+          link="/tab/setting"
           icon={LeftIcon}
         />
 
         <div style={{ padding: 20 }}>
           <Card>
             <CardContent>
-              <form
-                className={classes.container}
-                noValidate
-                autoComplete="off"
-              >
+              <form className={classes.container} noValidate autoComplete="off">
                 <TextField
                   id="full-width"
                   label="Representative account"
@@ -108,11 +104,11 @@ class Representative extends Component {
                   value={this.state.representative}
                   error={!_isEmpty(this.state.representativeError)}
                   margin="normal"
-                  onChange={this.handleChange('representative')}
+                  onChange={this.handleChange("representative")}
                 />
                 <TextField
                   id="wallet-password"
-                  label="Recipient"
+                  label="Wallet password"
                   InputProps={inputProps}
                   InputLabelProps={inputLabelProps}
                   placeholder="Wallet password"
@@ -122,7 +118,7 @@ class Representative extends Component {
                   helperText={this.state.passwordError}
                   error={!_isEmpty(this.state.passwordError)}
                   value={this.state.password}
-                  onChange={this.handleChange('password')}
+                  onChange={this.handleChange("password")}
                 />
               </form>
             </CardContent>
@@ -132,8 +128,8 @@ class Representative extends Component {
                 color="secondary"
                 fullWidth
                 style={{
-                  margin: '0 12px 20px 12px',
-                  color: 'white',
+                  margin: "0 12px 20px 12px",
+                  color: "white"
                 }}
                 onClick={this.handleEditRepresentative}
               >
@@ -141,16 +137,10 @@ class Representative extends Component {
               </Button>
             </CardActions>
           </Card>
-
-          <div style={{ marginTop: '1rem', textAlign: 'center' }}>
-            <Button component={Link} to={`/accounts/${accountParam}/edit`}>
-              Back edit account
-            </Button>
-          </div>
         </div>
       </Layout>
     );
   }
 }
 
-export default withStyles(styles)(inject('wallet')(observer(Representative)));
+export default withStyles(styles)(inject("wallet")(observer(Representative)));

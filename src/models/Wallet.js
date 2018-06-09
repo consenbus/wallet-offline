@@ -97,7 +97,7 @@ async function getRepresentative() {
 async function changeRepresentative(representativer, password) {
   const { currentIndex, core, currentInfo: info } = wallet;
 
-  if (info.frontier) throw Error("Account not found");
+  if (!info.frontier) throw Error("Account not found");
 
   // Step 3. Generate Proof of Work from your account's frontier
   const work = await pow(info.frontier);

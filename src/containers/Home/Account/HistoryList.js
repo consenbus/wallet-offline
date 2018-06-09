@@ -7,6 +7,7 @@ import AddCircleOutlineIcon from "material-ui-icons/AddCircleOutline";
 import RemoveCircleOutlineIcon from "material-ui-icons/RemoveCircleOutline";
 import pink from "material-ui/colors/pink";
 import green from "material-ui/colors/green";
+import { LinearProgress } from "material-ui/Progress";
 import _map from "lodash/map";
 
 import converter from "../../../utils/converter";
@@ -37,9 +38,9 @@ const styles = {
 
 class HistoryList extends Component {
   render() {
-    const { list, classes } = this.props;
+    const { list, classes, loading, error } = this.props;
 
-    if (!list.length) {
+    if (!loading && !list.length) {
       return (
         <div className={classes.error}>
           The account is not activated, and will be activated when a successful
@@ -48,35 +49,39 @@ class HistoryList extends Component {
       );
     }
     return (
-      <List>
-        {_map(list, h => (
-          <ListItem
-            key={h.hash}
-            component={Link}
-            to={`/explorer/blocks/${h.hash}`}
-          >
-            {h.type === "receive" ? (
-              <Avatar className={classes.greenAvatar}>
-                <AddCircleOutlineIcon />
-              </Avatar>
-            ) : (
-              <Avatar className={classes.pinkAvatar}>
-                <RemoveCircleOutlineIcon />
-              </Avatar>
-            )}
-            <span style={{ textOverflow: "ellipsis", overflow: "hidden" }}>
-              <ListItemText
-                primary={h.account}
-                secondary={
-                  h.type !== "receive"
-                    ? `${converter.plusFee(h.amount)} BUS`
-                    : `${converter.unit(h.amount || 0, "raw", "BUS")} BUS`
-                }
-              />
-            </span>
-          </ListItem>
-        ))}
-      </List>
+      <div>
+        {error && <div className={classes.error}>{error.message}</div>}
+        {loading && <LinearProgress />}
+        <List>
+          {_map(list, h => (
+            <ListItem
+              key={h.hash}
+              component={Link}
+              to={`/explorer/blocks/${h.hash}`}
+            >
+              {h.type === "receive" ? (
+                <Avatar className={classes.greenAvatar}>
+                  <AddCircleOutlineIcon />
+                </Avatar>
+              ) : (
+                <Avatar className={classes.pinkAvatar}>
+                  <RemoveCircleOutlineIcon />
+                </Avatar>
+              )}
+              <span style={{ textOverflow: "ellipsis", overflow: "hidden" }}>
+                <ListItemText
+                  primary={h.account}
+                  secondary={
+                    h.type !== "receive"
+                      ? `${converter.plusFee(h.amount)} BUS`
+                      : `${converter.unit(h.amount || 0, "raw", "BUS")} BUS`
+                  }
+                />
+              </span>
+            </ListItem>
+          ))}
+        </List>
+      </div>
     );
   }
 }

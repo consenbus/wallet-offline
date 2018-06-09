@@ -39,37 +39,34 @@ class Index extends Component {
       <Layout active="home">
         <Header title="Balance" />
         {accountLoading && <LinearProgress />}
-        {!accountLoading && (
-          <div
-            style={{
-              backgroundColor: blue.A700,
-              color: "white",
-              textAlign: "center",
-              paddingTop: "50px",
-              paddingBottom: "50px"
-            }}
-          >
-            <Typography variant="display1" color="inherit">
-              <span className={classes.name}>{name}</span>
-              <span className="ellipsis">
-                {converter.unit(currentInfo.balance || 0, "raw", "BUS")} BUS
-              </span>
-            </Typography>
-            <Typography variant="subheading" color="inherit">
-              <span className="ellipsis">
-                ≈ $ {converter.dollar(currentInfo.balance)}
-              </span>
-            </Typography>
-            <Typography variant="subheading" color="inherit">
-              <span className="ellipsis">
-                <span>Address_{currentIndex + 1}: </span>
-                {address}
-              </span>
-            </Typography>
-          </div>
-        )}
-        {historyLoading && <LinearProgress />}
-        {!historyLoading && <HistoryList list={currentHistory} />}
+        <div
+          style={{
+            backgroundColor: blue.A700,
+            color: "white",
+            textAlign: "center",
+            paddingTop: "50px",
+            paddingBottom: "50px"
+          }}
+        >
+          <Typography variant="display1" color="inherit">
+            <span className={classes.name}>{name}</span>
+            <span className="ellipsis">
+              {converter.unit(currentInfo.balance || 0, "raw", "BUS")} BUS
+            </span>
+          </Typography>
+          <Typography variant="subheading" color="inherit">
+            <span className="ellipsis">
+              ≈ $ {converter.dollar(currentInfo.balance)}
+            </span>
+          </Typography>
+          <Typography variant="subheading" color="inherit">
+            <span className="ellipsis">
+              <span>Address_{currentIndex + 1}: </span>
+              {address}
+            </span>
+          </Typography>
+        </div>
+        <HistoryList list={currentHistory} loading={historyLoading} />
       </Layout>
     );
   }

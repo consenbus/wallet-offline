@@ -132,23 +132,22 @@ class Account extends React.Component {
               <div className={classes.error}>{infoError.message}</div>
             )}
             {infoLoading && <LinearProgress />}
-            {!infoLoading &&
-              !infoError && (
-                <CardHeader
-                  subheader={account.account}
-                  title={`Balance: ${converter.unit(
-                    account.balance || 0,
-                    "raw",
-                    "BUS"
-                  )} BUS`}
-                />
-              )}
-            <Divider />
-            {historyError && (
-              <div className={classes.error}>{historyError.message}</div>
+            {account && (
+              <CardHeader
+                subheader={account.account}
+                title={`Balance: ${converter.unit(
+                  account.balance || 0,
+                  "raw",
+                  "BUS"
+                )} BUS`}
+              />
             )}
-            {historyLoading && <LinearProgress />}
-            {!historyLoading && !historyError && <HistoryList list={history} />}
+            <Divider />
+            <HistoryList
+              list={history}
+              loading={historyLoading}
+              error={historyError}
+            />
           </Card>
         </div>
       </Layout>

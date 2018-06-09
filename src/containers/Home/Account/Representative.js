@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { observer, inject } from "mobx-react";
-import { Link, Redirect } from "react-router-dom";
+import { Redirect } from "react-router-dom";
 import { withStyles } from "material-ui/styles";
 import TextField from "material-ui/TextField";
 import Card, { CardActions, CardContent } from "material-ui/Card";
@@ -63,7 +63,6 @@ class Representative extends Component {
   };
 
   render() {
-    const accountParam = this.props.match.params.account;
     if (this.state.success) {
       return <Redirect to="/" />;
     }

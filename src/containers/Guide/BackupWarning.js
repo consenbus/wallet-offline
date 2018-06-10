@@ -1,12 +1,10 @@
 import React, { Component } from "react";
-import backupWarningImage from "../../assets/img/backup/backup-warning.svg";
 import { Link } from "react-router-dom";
-
 import IconButton from "material-ui/IconButton";
 import Button from "material-ui/Button";
 import teal from "material-ui/colors/teal";
 import LeftIcon from "material-ui-icons/KeyboardArrowLeft";
-
+import backupWarningImage from "../../assets/img/backup/backup-warning.svg";
 import Layout from "./_Layout";
 
 class BackupWarning extends Component {
@@ -14,7 +12,7 @@ class BackupWarning extends Component {
     return (
       <Layout>
         <p style={{ textAlign: "left" }}>
-          <IconButton color="inherit" component={Link} to={"/guide/backup"}>
+          <IconButton color="inherit" component={Link} to="/guide/backup">
             <LeftIcon />
           </IconButton>
         </p>
@@ -41,7 +39,15 @@ class BackupWarning extends Component {
           Anyone with your backup seed can access or spend your bus coin.
         </p>
 
-        <div style={{ marginTop: "1rem" }}>
+        <div
+          style={{
+            position: "fixed",
+            bottom: "20px",
+            width: "90%",
+            backgroundColor: "rgb(34, 82, 163)",
+            maxWidth: "450px"
+          }}
+        >
           <Button
             variant="raised"
             color="secondary"
@@ -51,7 +57,7 @@ class BackupWarning extends Component {
             to="/guide/no-screenshot"
             style={{
               color: "white",
-              backgroundColor: teal["A700"]
+              backgroundColor: teal.A700
             }}
           >
             Got it

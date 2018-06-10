@@ -1,34 +1,32 @@
 import React, { Component } from "react";
-import noScreenshotImage from "../../assets/img/backup/no-screenshot.svg";
 import { Link } from "react-router-dom";
-import Layout from "./_Layout";
-
 import IconButton from "material-ui/IconButton";
 import ButtonBase from "material-ui/ButtonBase";
-// import red from "material-ui/colors/red";
 import LeftIcon from "material-ui-icons/KeyboardArrowLeft";
+import noScreenshotImage from "../../assets/img/backup/no-screenshot.svg";
+import Layout from "./_Layout";
 
 class NoScreenshot extends Component {
   render() {
     return (
-      <Layout color="#bb331a">
+      <Layout color="#bb331a" style={{ backgroundColor: "rgb(187, 51, 26)" }}>
         <p style={{ textAlign: "left" }}>
           <IconButton
             color="inherit"
             component={Link}
-            to={"/guide/backup-warning"}
+            to="/guide/backup-warning"
           >
             <LeftIcon />
           </IconButton>
         </p>
 
         <h2>Screenshots are not secure</h2>
-        <p style={{ marginTop: "1rem" }}>
+        <p style={{ marginTop: "1rem", backgroundColor: "rgb(187, 51, 26)" }}>
           If you take a screenshot, your backup may be viewed by other apps. You
           can make a safe backup with physical paper and a pen
         </p>
 
-        <div style={{ marginTop: "30%" }}>
+        <div style={{ marginTop: "30%", backgroundColor: "rgb(187, 51, 26)" }}>
           <img
             alt=""
             src={noScreenshotImage}
@@ -40,7 +38,15 @@ class NoScreenshot extends Component {
           />
         </div>
 
-        <div style={{ marginTop: "30%" }}>
+        <div
+          style={{
+            position: "fixed",
+            bottom: "20px",
+            width: "90%",
+            backgroundColor: "rgb(187, 51, 26)",
+            maxWidth: "450px"
+          }}
+        >
           <ButtonBase
             variant="raised"
             color="secondary"

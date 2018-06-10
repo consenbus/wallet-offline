@@ -17,15 +17,13 @@ let representative =
   "bus_1zrzcmckjhjcpcepmuua8fyqiq4e4exgt1ruxw4hymgfchiyeaa536w8fyot";
 
 const storeKeys = {
-  wallet: "consenbus/wallet-offline",
-  name: "consenbus/wallet-name"
+  wallet: "consenbus/wallet-offline"
 };
 
 const wallet = {};
 extendObservable(wallet, {
   core: null,
   error: null,
-  name: null,
   accounts: [], // accounts [[address, publicKey], ...]
   accountLoading: false, // account info load status
   historyLoading: false, // account history load status
@@ -395,18 +393,8 @@ function isExists() {
   return !!reader();
 }
 
-function setName(name) {
-  localStorage[storeKeys.name] = name;
-  wallet.name = name;
-}
-
-function getName() {
-  return localStorage[storeKeys.name];
-}
-
 function clearTempData() {
   wallet.error = null;
-  setName("");
   writer("");
   _times(10, index => {
     store.setItem(`history_${index}`, "");
@@ -442,8 +430,6 @@ Object.assign(wallet, {
   isExists,
   clearTempData,
   logout,
-  setName,
-  getName,
   languages,
   getRepresentative,
   changeRepresentative,

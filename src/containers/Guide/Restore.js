@@ -71,8 +71,6 @@ class Restore extends Component {
   state = {
     language: "en",
     success: false,
-    name: "",
-    nameError: "",
     value: "",
     valueError: "",
     password: "",
@@ -90,13 +88,8 @@ class Restore extends Component {
 
   handleRestore = e => {
     e.preventDefault();
-    const { name, password, confirmPassword, value, language } = this.state;
+    const { password, confirmPassword, value, language } = this.state;
     const { wallet } = this.props;
-
-    if (name === "") {
-      this.setState({ nameError: "Name must not be blank." });
-      return;
-    }
 
     if (value === "") {
       this.setState({ valueError: "Mnemonic/Seed must not be blank." });
@@ -120,7 +113,6 @@ class Restore extends Component {
     if (wallet.error) {
       this.setState({ valueError: wallet.error.message });
     } else {
-      wallet.setName(name);
       this.setState({ success: true });
     }
   };
@@ -160,20 +152,6 @@ class Restore extends Component {
           autoComplete="off"
           onSubmit={this.handleCreateAccount}
         >
-          <TextField
-            id="full-width"
-            label="Account name"
-            InputProps={inputProps}
-            InputLabelProps={inputLabelProps}
-            placeholder="Your name"
-            fullWidth
-            margin="normal"
-            helperText={this.state.nameError}
-            error={!_isEmpty(this.state.nameError)}
-            onChange={this.handleChange("name")}
-            value={this.state.name}
-          />
-
           <TextField
             label="Password"
             type="password"

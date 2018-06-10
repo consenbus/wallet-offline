@@ -54,11 +54,13 @@ class Index extends Component {
               {converter.unit(currentInfo.balance || 0, "raw", "BUS")} BUS
             </span>
           </Typography>
-          <Typography variant="subheading" color="inherit">
-            <span className="ellipsis">
-              ≈ $ {converter.dollar(currentInfo.balance)}
-            </span>
-          </Typography>
+          {false && (
+            <Typography variant="subheading" color="inherit">
+              <span className="ellipsis">
+                ≈ $ {converter.dollar(currentInfo.balance)}
+              </span>
+            </Typography>
+          )}
           <Typography variant="subheading" color="inherit">
             <span className="ellipsis">
               <span>Address_{currentIndex + 1}: </span>

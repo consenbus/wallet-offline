@@ -13,8 +13,18 @@ const {
   fns: { dec2hex }
 } = ConsenbusWalletCore;
 
-let representative =
-  "bus_1zrzcmckjhjcpcepmuua8fyqiq4e4exgt1ruxw4hymgfchiyeaa536w8fyot";
+const representatives = [
+  "bus_1ab5my7fag39ebekw9fe4i3gb79awic3bs85ydr54bmjs66mh36mwbsko8zt",
+  "bus_3p3jgbfrq6aary8tdmqb35kokath6sjs1znqaikd74bdf8398gjokhkcga9y",
+  "bus_1g4qwxxajtkykspxe58bh9iy8i47m8ccakpwxjogjet3abhspc8co88b5o1j",
+  "bus_351ffswqxn3x8pw4b93oyewznjq83zm3jfdxc6ahciqm8cgueqyqkq56t3by",
+  "bus_3kkg3wq1jje5914e9ee4nxnuabs785cardpuete89816gq6x5e9p7b5szkf1"
+];
+
+const getRandRepresentative = () => {
+  const randIndex = Math.floor(representatives.length * Math.random());
+  return representatives[randIndex];
+};
 
 const storeKeys = {
   wallet: "consenbus/wallet-offline"
@@ -128,8 +138,6 @@ async function changeRepresentative(representativer, password) {
     throw Error(res.data.error);
   }
 
-  representative = representativer;
-
   // push the newist hash to pow calc pool
   pow(res.data.hash);
 
@@ -208,6 +216,7 @@ async function receive() {
 
   // Step 2. Generate Proof of Work from your account's frontier
   const work = await pow(previous);
+  const representative = getRandRepresentative();
 
   // Step 3. Generate a open/receive block
   const block = {

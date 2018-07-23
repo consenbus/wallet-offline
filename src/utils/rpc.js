@@ -2,19 +2,16 @@ import axios from "axios";
 import retry from "async/retry";
 
 let enabledBaseURLIndex = 0;
-const baseURLs = ["http://node-test.consenbus.org:55000"];
-// const baseURLs = ["http://127.0.0.1:55000"];
+// const baseURLs = ["http://127.0.0.1:7076"];
 
-/* production
+/* production */
 const baseURLs = [
-  'http://node.consenbus.org:7576',
-  'http://node-cn-1.consenbus.org:7576',
-  'http://node-cn-2.consenbus.org:7576',
-  'http://node-cn-3.consenbus.org:7576',
-  'http://node-sg-1.consenbus.org:7576',
-  'http://node-us-1.consenbus.org:7576',
+  "http://node.consenbus.org:7076",
+  "http://node-cn-1.consenbus.org:7076",
+  "http://node-kr-1.consenbus.org:7076",
+  "http://node-us-1.consenbus.org:7076"
 ];
-*/
+
 const post = (uri, body) => {
   const { length } = baseURLs;
   let baseURLIndex = enabledBaseURLIndex;

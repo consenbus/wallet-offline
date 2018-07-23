@@ -54,7 +54,7 @@ class BackupWarning extends Component {
             size="large"
             fullWidth
             component={Link}
-            to="/guide/no-screenshot"
+            to="/guide/write-down"
             style={{
               color: "white",
               backgroundColor: teal.A700

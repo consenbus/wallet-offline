@@ -1,45 +1,45 @@
-import React, { Component } from 'react';
-import { observer, inject } from 'mobx-react';
-import { Link } from 'react-router-dom';
-import IconButton from 'material-ui/IconButton';
-import { withStyles } from 'material-ui/styles';
-import Button from 'material-ui/Button';
-import teal from 'material-ui/colors/teal';
-import LeftIcon from 'material-ui-icons/KeyboardArrowLeft';
-import Tabs, { Tab } from 'material-ui/Tabs';
-import Paper from 'material-ui/Paper';
-import Typography from 'material-ui/Typography';
-import Chip from 'material-ui/Chip';
-import Menu, { MenuItem } from 'material-ui/Menu';
+import React, { Component } from "react";
+import { observer, inject } from "mobx-react";
+import { Link } from "react-router-dom";
+import IconButton from "material-ui/IconButton";
+import { withStyles } from "material-ui/styles";
+import Button from "material-ui/Button";
+import teal from "material-ui/colors/teal";
+import LeftIcon from "material-ui-icons/KeyboardArrowLeft";
+import Tabs, { Tab } from "material-ui/Tabs";
+import Paper from "material-ui/Paper";
+import Typography from "material-ui/Typography";
+import Chip from "material-ui/Chip";
+import Menu, { MenuItem } from "material-ui/Menu";
 
-import Layout from './_Layout';
-import Password from '../../components/Password';
-import styles from '../../styles/form';
+import Layout from "./_Layout";
+import Password from "../../components/Password";
+import styles from "../../styles/form";
 
 const langs = {
-  zh: '简体中文',
-  cht: '繁体中文',
-  en: 'English',
-  jp: '日本語',
-  kor: '한국어',
-  fra: 'Français',
-  spa: 'El español',
-  it: 'In Italiano',
+  zh: "简体中文",
+  cht: "繁体中文",
+  en: "English",
+  jp: "日本語",
+  kor: "한국어",
+  fra: "Français",
+  spa: "El español",
+  it: "In Italiano"
 };
 
 class WriteDown extends Component {
   state = {
-    type: 'mnemonic', // entropy or mnemonic
-    language: 'en',
+    type: "mnemonic", // entropy or mnemonic
+    language: "en",
     content: null,
     password: null,
-    anchorEl: null,
-  }
+    anchorEl: null
+  };
 
   getBackupContent(password, type, language) {
     const { wallet } = this.props;
     let content;
-    if (type === 'mnemonic') {
+    if (type === "mnemonic") {
       content = wallet.backupFromMnemonic(password, language);
     } else {
       content = wallet.backupFromEntropy(password);
@@ -50,27 +50,27 @@ class WriteDown extends Component {
   changeType = (event, type) => {
     this.setState({ type });
     this.getBackupContent(this.state.password, type, this.state.language);
-  }
+  };
 
   handleClose = () => {
     this.setState({ anchorEl: null });
-  }
+  };
 
   changeLanguage = (event, language) => {
     this.setState({ language, anchorEl: null });
     this.getBackupContent(this.state.password, this.state.type, language);
-  }
+  };
 
-  handleClickListItem = (event) => {
+  handleClickListItem = event => {
     this.setState({ anchorEl: event.currentTarget });
-  }
+  };
 
   clearTempData = () => {
     const { wallet } = this.props;
     wallet.clearTempData();
-  }
+  };
 
-  receivePassword = (password) => {
+  receivePassword = password => {
     this.setState({ password });
     const { wallet } = this.props;
     if (!wallet.core || !wallet.core.exists()) {
@@ -79,12 +79,10 @@ class WriteDown extends Component {
     if (!wallet.error) {
       this.getBackupContent(password, this.state.type, this.state.language);
     }
-  }
+  };
 
   render() {
-    const {
-      password, type, language, content, anchorEl,
-    } = this.state;
+    const { password, type, language, content, anchorEl } = this.state;
     const { wallet, classes } = this.props;
 
     if (!password || wallet.error) {
@@ -100,7 +98,7 @@ class WriteDown extends Component {
 
     return (
       <Layout>
-        <p style={{ textAlign: 'left' }}>
+        <p style={{ textAlign: "left" }}>
           <IconButton
             color="inherit"
             component={Link}
@@ -121,31 +119,32 @@ class WriteDown extends Component {
             <Tab label="Mnemonic" value="mnemonic" />
             <Tab label="Seed" value="entropy" />
           </Tabs>
-          {type === 'entropy' && (
-            <Typography >
-              <p style={{ marginTop: '1rem' }}>
+          {type === "entropy" && (
+            <Typography>
+              <p style={{ marginTop: "1rem" }}>
                 Please carefully write down this 64 character seed.
               </p>
-              <div style={{
-                fontSize: '1.5rem',
-                marginBottom: '1rem',
-                color: teal.A700,
-                padding: '1rem',
-                textAlign: 'left',
-              }}
+              <div
+                style={{
+                  fontSize: "1.5rem",
+                  marginBottom: "1rem",
+                  color: teal.A700,
+                  padding: "1rem",
+                  textAlign: "left"
+                }}
               >
-                <p className="ellipsis">
-                  {content}
-                </p>
+                <p className="ellipsis">{content}</p>
               </div>
             </Typography>
           )}
-          {type === 'mnemonic' && (
+          {type === "mnemonic" && (
             <Typography>
-              <p style={{ marginTop: '1rem' }}>
+              <p style={{ marginTop: "1rem" }}>
                 Please carefully write down this 24 words.
               </p>
-              <Button onClick={this.handleClickListItem}>{langs[language]} Switch</Button>
+              <Button onClick={this.handleClickListItem}>
+                {langs[language]} Switch
+              </Button>
               <Menu
                 id="switch-account"
                 anchorEl={anchorEl}
@@ -162,35 +161,41 @@ class WriteDown extends Component {
                   </MenuItem>
                 ))}
               </Menu>
-              <div style={{
-                fontSize: '1.5rem', padding: '1rem', lineHeight: '2rem', textAlign: 'left',
-              }}
+              <div
+                style={{
+                  fontSize: "1.5rem",
+                  padding: "1rem",
+                  lineHeight: "2rem",
+                  textAlign: "left"
+                }}
               >
-                {content.split(' ').map((x) => {
+                {content.split(" ").map(x => {
                   c += 1;
-                  return (<Chip
-                    key={c}
-                    label={x}
-                    className={classes.chip}
-                    style={{ marginRight: '0.3rem' }}
-                  />);
+                  return (
+                    <Chip
+                      key={c}
+                      label={x}
+                      className={classes.chip}
+                      style={{ marginRight: "0.3rem" }}
+                    />
+                  );
                 })}
               </div>
             </Typography>
           )}
         </Paper>
 
-        <div style={{ marginTop: '1rem' }}>
+        <div style={{ marginTop: "1rem" }}>
           <Button
             variant="raised"
             color="secondary"
             size="large"
             fullWidth
             component={Link}
-            to="/guide/done"
+            to="/"
             style={{
-              color: 'white',
-              backgroundColor: teal.A700,
+              color: "white",
+              backgroundColor: teal.A700
             }}
           >
             I have written it down
@@ -201,4 +206,4 @@ class WriteDown extends Component {
   }
 }
 
-export default withStyles(styles)(inject('wallet')(observer(WriteDown)));
+export default withStyles(styles)(inject("wallet")(observer(WriteDown)));

@@ -13,12 +13,30 @@ const {
   fns: { dec2hex }
 } = ConsenbusWalletCore;
 
+/* for test network
 const representatives = [
   "bus_1ab5my7fag39ebekw9fe4i3gb79awic3bs85ydr54bmjs66mh36mwbsko8zt",
   "bus_3p3jgbfrq6aary8tdmqb35kokath6sjs1znqaikd74bdf8398gjokhkcga9y",
   "bus_1g4qwxxajtkykspxe58bh9iy8i47m8ccakpwxjogjet3abhspc8co88b5o1j",
   "bus_351ffswqxn3x8pw4b93oyewznjq83zm3jfdxc6ahciqm8cgueqyqkq56t3by",
   "bus_3kkg3wq1jje5914e9ee4nxnuabs785cardpuete89816gq6x5e9p7b5szkf1"
+];
+*/
+
+/* for live network */
+const representatives = [
+  "bus_33qn4ryurfbutporn3uxeax7zqk3wtuyo7hae1nbcpnjz4w39g85spwamz3o", // 193.112.86.25
+  "bus_3zmfjsqnifgiwondh9ejfh8guexhphj8gsquofej8dc1ok734o15tig8oqik", // 118.24.165.152
+  "bus_19gjfegxfibnpf5hnm9rg7nfxh7qpz9kdkzeykorcpnemrq7x7165cqsfagq", // 118.24.108.183
+  "bus_3u5bpg1cas74ifms1soyp5q1kwtwmtda4on94txhko3cofzegth9pcxi1ezh", // 193.112.95.108
+  "bus_3gyito6pf5pg385nqre7tdbxgbzoi6doq89t5cukxiyiyuqfxwmm8agfu6o7", // 111.230.193.136
+  "bus_3jxupp817mjwwdj84sdz8udud6bwgwrujbq8xi4ma5ggkq8o36fdd4386ygg", // 150.109.47.190
+  "bus_37wcfcpqp9iymf8anwy78f7kktrcoffz39a7d1ki8gerfhuhpr964bbe7bmd", // 150.109.46.150
+  "bus_1quihhar9nak47k3wet7tub7c8m1qmo4mur9te7sqnt5tr9a6tmcixwef5g1", // 47.254.45.34
+  "bus_3tykg6otbctreian7poen8c8zp1t3ssh8ynsffwefddwqwepdjjqz3so5r7k", // 58.87.125.39
+  "bus_1i4wmotbfdbgzrdtudj31qcfqohjfqkb8hhq1ndna74ke66gb339bmg6oqmp", // 47.254.129.191
+  "bus_3zai1ujjrwzmi9ouatwshyk64ohsymthb66trh8a7mr75xb9e7aifirytpof", // 47.91.45.135
+  "bus_3pmqawfctzz196yr96tb4ft37fyc5jujo8itp1s49tfqttuopj7s3h7zb8os" // 119.3.29.62
 ];
 
 const getRandRepresentative = () => {
